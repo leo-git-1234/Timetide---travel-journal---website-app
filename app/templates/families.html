@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Families - Timetide{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Your Families</h1>
+        <p class="dashboard-subtitle">Groups you travel with and document together</p>
+    </div>
+    
+    {% if families %}
+    <div class="trips-grid">
+        {% for family in families %}
+        <div class="trip-card" onclick="window.location.href='/family/{{ family.id }}'">
+            <div class="trip-card-content" style="padding: 2rem;">
+                <h3 class="trip-card-title">{{ family.name }}</h3>
+                <p class="text-muted">{{ family.description }}</p>
+                <div class="trip-card-dates">
+                    {{ family.members|length }} members
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center mt-4">
+        <p class="text-muted mb-3">You haven't joined any family groups yet.</p>
+        <p class="text-muted">Create a family group to start collaborating on trips with loved ones.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Create New Family Button -->
+    <div class="mt-3">
+        <button class="create-trip-btn" onclick="window.location.href='/family/new'">
+            Create New Family Group
+        </button>
+    </div>
+</div>
+{% endblock %}

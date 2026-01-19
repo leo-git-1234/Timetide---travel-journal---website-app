@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Timetide{% endblock %}
+
+{% block content %}
+<div class="container-narrow">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-avatar-large">
+            {% if current_user %}
+                {{ current_user.name[0]|upper }}
+            {% else %}
+                U
+            {% endif %}
+        </div>
+        
+        <h1 class="profile-name">
+            {% if current_user %}
+                {{ current_user.name }}
+            {% else %}
+                User Profile
+            {% endif %}
+        </h1>
+        
+        <p class="profile-bio">
+            {% if current_user and current_user.bio %}
+                {{ current_user.bio }}
+            {% else %}
+                A traveler preserving memories
+            {% endif %}
+        </p>
+    </div>
+    
+    <!-- Profile Stats -->
+    <div class="profile-stats">
+        <div class="profile-stat">
+            <span class="stat-number">12</span>
+            <span class="stat-label">Trips</span>
+        </div>
+        <div class="profile-stat">
+            <span class="stat-number">248</span>
+            <span class="stat-label">Entries</span>
+        </div>
+        <div class="profile-stat">
+            <span class="stat-number">8</span>
+            <span class="stat-label">Families</span>
+        </div>
+    </div>
+    
+    <!-- Edit Profile Button -->
+    <div class="text-center mt-3">
+        <button class="btn btn-secondary">Edit Profile</button>
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="mt-4">
+        <h2>Recent Activity</h2>
+        <p class="text-muted">Your latest journaling moments will appear here.</p>
+    </div>
+</div>
+{% endblock %}

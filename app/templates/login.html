@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - Timetide{% endblock %}
+
+{% block content %}
+<div class="container-narrow" style="max-width: 500px; margin-top: 4rem;">
+    <div class="text-center mb-4">
+        <h1 style="font-family: var(--font-serif); font-size: 2.5rem;">Welcome Back</h1>
+        <p class="text-muted">Sign in to continue your journey</p>
+    </div>
+    
+    <form action="/auth/login" method="POST" style="background: white; padding: 2rem; border: 1px solid var(--border); border-radius: 4px;">
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="username" class="form-input" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password" class="form-input" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+        
+        <div class="text-center mt-3">
+            <p class="text-muted">
+                Don't have an account? <a href="/register">Create one</a>
+            </p>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Trip - Timetide{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-trip-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .create-trip-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .create-trip-header h1 {
+        font-family: var(--font-serif);
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .create-trip-header p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .trip-form {
+        background: var(--surface);
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-family: var(--font-sans);
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .form-label .required {
+        color: #c94848;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-file {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        font-family: var(--font-sans);
+        font-size: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text-primary);
+        transition: var(--transition);
+    }
+
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-file:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(110, 140, 120, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+        font-family: var(--font-sans);
+    }
+
+    .date-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-helper {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    .image-preview-container {
+        margin-top: 1rem;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .image-preview-label {
+        display: block;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    /* Media upload section */
+    .media-upload-section {
+        background: linear-gradient(135deg, rgba(122, 166, 147, 0.04), rgba(122, 166, 147, 0.02));
+        border: 2px dashed var(--accent);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .media-upload-section:hover {
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(122, 166, 147, 0.08), rgba(122, 166, 147, 0.04));
+    }
+
+    .media-upload-section.dragover {
+        background: linear-gradient(135deg, rgba(122, 166, 147, 0.12), rgba(122, 166, 147, 0.08));
+        border-color: var(--accent);
+    }
+
+    .media-upload-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .media-upload-text {
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .media-upload-subtext {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    #mediaInput {
+        display: none;
+    }
+
+    .media-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .media-item {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--border);
+        aspect-ratio: 1;
+    }
+
+    .media-item-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .media-item-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .media-item:hover .media-item-overlay {
+        opacity: 1;
+    }
+
+    .media-item-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .media-item-btn {
+        background: white;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: all 0.2s ease;
+    }
+
+    .media-item-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .media-item-btn.cover {
+        background: var(--accent);
+        color: white;
+    }
+
+    .media-item-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--accent);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .media-empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 3rem;
+        justify-content: center;
+    }
+
+    .btn-submit,
+    .btn-cancel {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: var(--font-sans);
+    }
+
+    .btn-submit {
+        background: var(--accent);
+        color: white;
+        min-width: 200px;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background: var(--surface-alt);
+        color: var(--text-primary);
+        min-width: 200px;
+    }
+
+    .btn-cancel:hover {
+        background: var(--border);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .error-message {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    .success-message {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+
+    .loading {
+        display: none;
+        text-align: center;
+        color: var(--text-secondary);
+        margin-top: 1rem;
+    }
+
+    .loading.show {
+        display: block;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .create-trip-container {
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .trip-form {
+            padding: 2rem;
+        }
+
+        .date-group {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-trip-container">
+    <!-- Header -->
+    <div class="create-trip-header">
+        <h1>Begin a New Journey</h1>
+        <p>Document your travels, one moment at a time</p>
+    </div>
+
+    <!-- Messages -->
+    <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+
+    <!-- Create Trip Form -->
+    <form class="trip-form" id="createTripForm">
+        <!-- Title -->
+        <div class="form-group">
+            <label class="form-label" for="title">
+                Trip Title <span class="required">*</span>
+            </label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                class="form-input"
+                placeholder="e.g., Summer in Tuscany"
+                required
+                minlength="1"
+                maxlength="255"
+            />
+            <p class="form-helper">Give your journey a meaningful name</p>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label class="form-label" for="description">
+                Description
+            </label>
+            <textarea
+                id="description"
+                name="description"
+                class="form-textarea"
+                placeholder="What inspired this trip? What do you hope to remember?"
+                maxlength="2000"
+            ></textarea>
+            <p class="form-helper">Share the story behind this journey (optional)</p>
+        </div>
+
+        <!-- Dates -->
+        <div class="form-group">
+            <label class="form-label">Trip Dates</label>
+            <div class="date-group">
+                <div>
+                    <label class="form-label" for="startDate" style="margin-bottom: 0.5rem;">
+                        Start Date <span class="required">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="startDate"
+                        name="startDate"
+                        class="form-input"
+                        required
+                    />
+                </div>
+                <div>
+                    <label class="form-label" for="endDate" style="margin-bottom: 0.5rem;">
+                        End Date <span class="required">*</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="endDate"
+                        name="endDate"
+                        class="form-input"
+                        required
+                    />
+                </div>
+            </div>
+            <p class="form-helper">Mark the beginning and end of your journey</p>
+        </div>
+
+        <!-- Cover Image -->
+        <div class="form-group">
+            <label class="form-label" for="coverImage">
+                Cover Image
+            </label>
+            <input
+                type="file"
+                id="coverImage"
+                name="coverImage"
+                class="form-file"
+                accept="image/*"
+            />
+            <p class="form-helper">Choose a memorable photo to represent this trip (optional). Or upload it in the media section below.</p>
+            <div class="image-preview-container" id="imagePreview" style="display: none;">
+                <img id="previewImg" src="" alt="Cover preview" class="image-preview" />
+                <p class="image-preview-label">Image preview</p>
+            </div>
+        </div>
+
+        <!-- Media Upload Section -->
+        <div class="form-group">
+            <label class="form-label">Add Photos & Videos</label>
+            <div class="media-upload-section" id="mediaUploadSection">
+                <div class="media-upload-icon">📸</div>
+                <div class="media-upload-text">Click to upload or drag and drop</div>
+                <div class="media-upload-subtext">Photos (JPG, PNG, GIF) and Videos (MP4, WebM)</div>
+            </div>
+            <input
+                type="file"
+                id="mediaInput"
+                name="mediaInput"
+                multiple
+                accept="image/*,video/*"
+            />
+            <p class="form-helper">Add as many photos and videos as you'd like. Select one as your trip cover.</p>
+
+            <!-- Media Gallery -->
+            <div id="mediaGallery" class="media-gallery" style="display: none;"></div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Creating your trip...</p>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="window.history.back()">
+                Cancel
+            </button>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                Create Trip
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const form = document.getElementById('createTripForm');
+    const titleInput = document.getElementById('title');
+    const descriptionInput = document.getElementById('description');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    
+    // Media upload variables
+    const mediaUploadSection = document.getElementById('mediaUploadSection');
+    const mediaInput = document.getElementById('mediaInput');
+    const mediaGallery = document.getElementById('mediaGallery');
+    let uploadedMedia = []; // Array to store {file, type (image/video), url (base64)}
+    let selectedCoverIndex = 0; // Index of selected cover image
+
+    // Media upload - click to select
+    mediaUploadSection.addEventListener('click', () => {
+        mediaInput.click();
+    });
+
+    // Media upload - drag and drop
+    mediaUploadSection.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        mediaUploadSection.classList.add('dragover');
+    });
+
+    mediaUploadSection.addEventListener('dragleave', () => {
+        mediaUploadSection.classList.remove('dragover');
+    });
+
+    mediaUploadSection.addEventListener('drop', (e) => {
+        e.preventDefault();
+        mediaUploadSection.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleMediaFiles(files);
+    });
+
+    // Handle media file selection
+    mediaInput.addEventListener('change', (e) => {
+        handleMediaFiles(e.target.files);
+    });
+
+    async function handleMediaFiles(files) {
+        for (const file of files) {
+            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+                continue; // Skip non-media files
+            }
+
+            try {
+                const dataUrl = await fileToDataUrl(file);
+                uploadedMedia.push({
+                    file: file,
+                    type: file.type.startsWith('image/') ? 'image' : 'video',
+                    name: file.name,
+                    url: dataUrl
+                });
+            } catch (error) {
+                console.error('Error processing file:', error);
+            }
+        }
+
+        renderMediaGallery();
+    }
+
+    function fileToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderMediaGallery() {
+        if (uploadedMedia.length === 0) {
+            mediaGallery.style.display = 'none';
+            return;
+        }
+
+        mediaGallery.style.display = 'grid';
+        mediaGallery.innerHTML = '';
+
+        uploadedMedia.forEach((media, index) => {
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'media-item';
+
+            // Preview (image or video thumbnail)
+            if (media.type === 'image') {
+                const img = document.createElement('img');
+                img.src = media.url;
+                img.className = 'media-item-preview';
+                mediaItem.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = media.url;
+                video.className = 'media-item-preview';
+                mediaItem.appendChild(video);
+
+                // Video indicator
+                const icon = document.createElement('div');
+                icon.style.position = 'absolute';
+                icon.style.top = '0.5rem';
+                icon.style.left = '0.5rem';
+                icon.style.background = 'rgba(0, 0, 0, 0.7)';
+                icon.style.color = 'white';
+                icon.style.padding = '0.25rem 0.5rem';
+                icon.style.borderRadius = '4px';
+                icon.style.fontSize = '0.75rem';
+                icon.textContent = '🎥 VIDEO';
+                mediaItem.appendChild(icon);
+            }
+
+            // Cover badge
+            if (index === selectedCoverIndex) {
+                const badge = document.createElement('div');
+                badge.className = 'media-item-badge';
+                badge.textContent = 'COVER';
+                mediaItem.appendChild(badge);
+            }
+
+            // Overlay with actions
+            const overlay = document.createElement('div');
+            overlay.className = 'media-item-overlay';
+
+            const actions = document.createElement('div');
+            actions.className = 'media-item-actions';
+
+            // Set as cover button
+            const coverBtn = document.createElement('button');
+            coverBtn.className = 'media-item-btn cover';
+            coverBtn.innerHTML = '📌';
+            coverBtn.type = 'button';
+            coverBtn.title = 'Set as cover image';
+            coverBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedCoverIndex = index;
+                renderMediaGallery();
+            });
+            actions.appendChild(coverBtn);
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'media-item-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.style.background = '#d84444';
+            deleteBtn.style.color = 'white';
+            deleteBtn.type = 'button';
+            deleteBtn.title = 'Remove';
+            deleteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                uploadedMedia.splice(index, 1);
+                if (selectedCoverIndex >= uploadedMedia.length) {
+                    selectedCoverIndex = uploadedMedia.length - 1;
+                }
+                renderMediaGallery();
+            });
+            actions.appendChild(deleteBtn);
+
+            overlay.appendChild(actions);
+            mediaItem.appendChild(overlay);
+
+            mediaGallery.appendChild(mediaItem);
+        });
+    }
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Hide previous messages
+        errorMessage.classList.remove('show');
+        successMessage.classList.remove('show');
+
+        // Validate dates
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+
+        if (endDate < startDate) {
+            showError('End date must be after start date');
+            return;
+        }
+
+        // Determine cover image URL
+        let coverImageUrl = null;
+        if (uploadedMedia.length > 0 && selectedCoverIndex < uploadedMedia.length) {
+            // Use selected media as cover (only if it's an image)
+            const selectedMedia = uploadedMedia[selectedCoverIndex];
+            if (selectedMedia.type === 'image') {
+                coverImageUrl = selectedMedia.url;
+            }
+        }
+
+        // Prepare trip data
+        const tripData = {
+            title: titleInput.value.trim(),
+            description: descriptionInput.value.trim() || null,
+            start_date: startDateInput.value,
+            end_date: endDateInput.value,
+            cover_image: coverImageUrl,
+            media_files: uploadedMedia.map(m => ({
+                url: m.url,
+                type: m.type,
+                name: m.name
+            }))
+        };
+
+        // Submit to backend
+        submitBtn.disabled = true;
+        loadingIndicator.classList.add('show');
+
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            const response = await fetch('/trips/', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(tripData),
+                credentials: 'include'
+            });
+
+            if (response.status === 401) {
+                showError('Please log in to create a trip');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to create trip');
+            }
+
+            const createdTrip = await response.json();
+            
+            // Show success message
+            showSuccess('Trip created successfully! Redirecting...');
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1500);
+
+        } catch (error) {
+            showError(error.message);
+            submitBtn.disabled = false;
+        } finally {
+            loadingIndicator.classList.remove('show');
+        }
+    });
+
+    // Helper function to show error
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Helper function to show success
+    function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Set minimum end date when start date changes
+    startDateInput.addEventListener('change', function() {
+        endDateInput.min = startDateInput.value;
+        if (endDateInput.value && new Date(endDateInput.value) < new Date(startDateInput.value)) {
+            endDateInput.value = startDateInput.value;
+        }
+    });
+
+    // Initialize with today's date
+    const today = new Date().toISOString().split('T')[0];
+    startDateInput.value = today;
+    endDateInput.value = today;
+    endDateInput.min = today;
+</script>
+{% endblock %}

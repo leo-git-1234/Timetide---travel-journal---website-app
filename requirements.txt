@@ -1,0 +1,34 @@
+# Timetide - Travel Diary Application
+# Python Dependencies
+
+# FastAPI framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+alembic==1.12.1  # Database migrations
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0  # JWT tokens
+passlib[bcrypt]==1.7.4  # Password hashing
+python-multipart==0.0.6  # Form data parsing
+
+# Templates
+jinja2==3.1.2
+
+# Validation
+pydantic==2.5.0
+pydantic[email]==2.5.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Testing (optional)
+pytest==7.4.3
+httpx==0.25.1  # For testing async endpoints
+
+# Development tools (optional)
+black==23.11.0  # Code formatting
+flake8==6.1.0  # Linting

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Timetide{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .settings-header {
+        margin-bottom: 3rem;
+    }
+
+    .settings-title {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .settings-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .settings-section {
+        background: var(--surface);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .settings-section-title {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .settings-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .settings-row:last-child {
+        border-bottom: none;
+    }
+
+    .settings-label {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .settings-label-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .settings-label-desc {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .settings-action {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-small {
+        padding: 0.625rem 1.25rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+
+    .btn-small:hover {
+        opacity: 0.9;
+    }
+
+    .btn-small-secondary {
+        background: var(--surface-alt);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+    }
+
+    .btn-small-secondary:hover {
+        background: var(--border);
+    }
+
+    .btn-small-danger {
+        background: #c94848;
+        color: white;
+    }
+
+    .btn-small-danger:hover {
+        opacity: 0.9;
+    }
+
+    .settings-info {
+        background: #f0f7ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 6px;
+        padding: 1rem;
+        color: #0056b3;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .settings-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .settings-action {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-small {
+            flex: 1;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <!-- Settings Header -->
+    <div class="settings-header">
+        <h1 class="settings-title">Settings</h1>
+        <p class="settings-subtitle">Manage your account preferences and privacy</p>
+    </div>
+
+    <!-- Account Settings Section -->
+    <div class="settings-section">
+        <h2 class="settings-section-title">Account</h2>
+        
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Email Address</span>
+                <span class="settings-label-desc">
+                    {% if current_user %}
+                        {{ current_user.email }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-secondary" disabled>Change Email</button>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Password</span>
+                <span class="settings-label-desc">Last changed recently</span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-secondary" disabled>Change Password</button>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Username</span>
+                <span class="settings-label-desc">
+                    {% if current_user %}
+                        @{{ current_user.username }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-secondary" disabled>Change Username</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy & Sharing Section -->
+    <div class="settings-section">
+        <h2 class="settings-section-title">Privacy & Sharing</h2>
+        
+        <div class="settings-info">
+            Privacy settings are coming soon. Your trips are currently private and only visible to you.
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Profile Visibility</span>
+                <span class="settings-label-desc">Control who can see your profile</span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-secondary" disabled>Configure</button>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Trip Sharing</span>
+                <span class="settings-label-desc">Manage shared trips with family</span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-secondary" disabled>Manage</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone Section -->
+    <div class="settings-section">
+        <h2 class="settings-section-title">Danger Zone</h2>
+        
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Delete Account</span>
+                <span class="settings-label-desc">Permanently delete your account and all data</span>
+            </div>
+            <div class="settings-action">
+                <button class="btn-small btn-small-danger" disabled>Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

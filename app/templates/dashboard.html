@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Timetide{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-loading {
+        text-align: center;
+        padding: 5rem 1.5rem;
+        color: var(--text-muted);
+    }
+
+    .dashboard-spinner {
+        display: inline-block;
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1.5rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Welcome card styles for unauthenticated users */
+    .welcome-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(247,247,245,0.95));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 2rem;
+    }
+
+    .welcome-card {
+        background: var(--surface, #f7f7f5);
+        border-radius: 20px;
+        padding: 4rem 3rem;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.08);
+        border: 1px solid var(--border, rgba(0,0,0,0.06));
+        text-align: center;
+    }
+
+    .welcome-title {
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: 2rem;
+        margin: 0 0 1rem 0;
+        color: var(--text-strong, #1d1d1b);
+        line-height: 1.2;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted, #5c5a57);
+        margin: 0 0 2rem 0;
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .welcome-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .welcome-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--accent, #7aa693);
+        background: transparent;
+        color: var(--accent, #7aa693);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .welcome-btn:hover {
+        background: var(--accent, #7aa693);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .welcome-btn.primary {
+        background: var(--accent, #7aa693);
+        color: white;
+    }
+
+    .welcome-btn.primary:hover {
+        background: var(--accent, #7aa693);
+        filter: brightness(0.95);
+    }
+
+    /* Empty state for authenticated users without trips */
+    .empty-journey-card {
+        background: var(--surface, #f7f7f5);
+        border-radius: 16px;
+        padding: 3.5rem 3rem;
+        max-width: 600px;
+        margin: 4rem auto;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border: 1px solid var(--border, rgba(0,0,0,0.06));
+        text-align: center;
+    }
+
+    .empty-journey-title {
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: 1.75rem;
+        margin: 0 0 1rem 0;
+        color: var(--text-strong, #1d1d1b);
+        line-height: 1.3;
+    }
+
+    .empty-journey-subtitle {
+        font-size: 0.95rem;
+        color: var(--text-muted, #5c5a57);
+        margin: 0 0 2.5rem 0;
+        line-height: 1.6;
+    }
+
+    .create-trip-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--accent, #7aa693);
+        background: var(--accent, #7aa693);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .create-trip-btn:hover {
+        filter: brightness(0.95);
+        transform: translateY(-2px);
+    }
+
+    .dashboard-error {
+        background: color-mix(in srgb, #d84444 12%, #fff 88%);
+        border: 1px solid color-mix(in srgb, #d84444 24%, transparent);
+        color: #6e2a2a;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    /* Trips grid */
+    .trips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .trip-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+
+    .trip-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .trip-card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .trip-card-content {
+        padding: 1.5rem;
+        background: white;
+    }
+
+    .trip-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-strong);
+    }
+
+    .trip-card-dates {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+    }
+
+    .trip-card-mood {
+        font-size: 0.9rem;
+        color: var(--text);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+        .welcome-card {
+            padding: 2.5rem 1.5rem;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .empty-journey-card {
+            padding: 2rem 1.5rem;
+            margin: 2rem 1rem;
+        }
+
+        .empty-journey-title {
+            font-size: 1.4rem;
+        }
+
+        .welcome-actions {
+            flex-direction: column;
+        }
+
+        .welcome-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Your Journeys</h1>
+        <p class="dashboard-subtitle">A collection of moments, carefully preserved</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loadingState" class="dashboard-loading">
+        <div class="dashboard-spinner"></div>
+        <p>Loading your journeys...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="dashboard-error" style="display: none;">
+        <div id="errorTitle" style="font-weight: 600; margin-bottom: 0.5rem;">Failed to load trips</div>
+        <p id="errorMessage" style="margin: 0;">An error occurred while fetching your trips.</p>
+    </div>
+
+    <!-- Unauthenticated Welcome Overlay -->
+    <div id="welcomeOverlay" class="welcome-overlay" style="display: none;">
+        <div class="welcome-card">
+            <h2 class="welcome-title">Welcome to Timetide</h2>
+            <p class="welcome-subtitle">Preserve your journeys as living archives. Every trip becomes a gentle record of where you've been and what you've discovered.</p>
+            <div class="welcome-actions">
+                <a href="/login" class="welcome-btn">Sign In</a>
+                <a href="/signup" class="welcome-btn primary">Create Account</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journeys Grid (for authenticated users with trips) -->
+    <div id="tripsGrid" class="trips-grid" style="display: none;"></div>
+
+    <!-- Create New Trip Button (visible when trips exist) -->
+    <div id="createTripButtonContainer" style="display: none; text-align: center; margin-top: 3rem; margin-bottom: 2rem;">
+        <button class="create-trip-btn" onclick="window.location.href='/trip/new'">
+            Create New Trip
+        </button>
+    </div>
+
+    <!-- Empty State for Authenticated Users Without Trips -->
+    <div id="emptyState" style="display: none;">
+        <div class="empty-journey-card">
+            <h2 class="empty-journey-title">Every journey begins with a first quiet step.</h2>
+            <p class="empty-journey-subtitle">Start a trip and watch your days unfold into a living archive—gentle, honest, and yours.</p>
+            <button class="create-trip-btn" onclick="window.location.href='/trip/new'">Create Your First Trip</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Get auth token from cookie
+    function getAuthToken() {
+        const name = 'timetide_token=';
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookieArray = decodedCookie.split(';');
+        for (let cookie of cookieArray) {
+            cookie = cookie.trim();
+            if (cookie.indexOf(name) === 0) {
+                return cookie.substring(name.length);
+            }
+        }
+        return null;
+    }
+
+    // Check if user is authenticated (backend context)
+    const isAuthenticated = {{ is_authenticated|lower }};
+
+    // Format date for display
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+        return formatter.format(date);
+    }
+
+    // Get month and day only
+    function formatDateShort(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric'
+        });
+        return formatter.format(date);
+    }
+
+    // Load trips from backend
+    async function loadTrips() {
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+        const tripsGrid = document.getElementById('tripsGrid');
+        const emptyState = document.getElementById('emptyState');
+        const createTripButtonContainer = document.getElementById('createTripButtonContainer');
+
+        // Hide all states initially
+        loadingState.style.display = 'block';
+        errorState.style.display = 'none';
+        welcomeOverlay.style.display = 'none';
+        tripsGrid.style.display = 'none';
+        emptyState.style.display = 'none';
+        createTripButtonContainer.style.display = 'none';
+
+        // If not authenticated, show welcome overlay
+        if (!isAuthenticated) {
+            loadingState.style.display = 'none';
+            welcomeOverlay.style.display = 'flex';
+            return;
+        }
+
+        try {
+            // Fetch trips from backend
+            const response = await fetch('/trips/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const trips = await response.json();
+
+            // Clear grid
+            tripsGrid.innerHTML = '';
+
+            if (trips.length === 0) {
+                // Show empty state for authenticated users
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+            } else {
+                // Populate grid with trips
+                trips.forEach(trip => {
+                    const tripCard = createTripCard(trip);
+                    tripsGrid.appendChild(tripCard);
+                });
+
+                loadingState.style.display = 'none';
+                tripsGrid.style.display = 'grid';
+                createTripButtonContainer.style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error('Error loading trips:', error);
+            loadingState.style.display = 'none';
+            document.getElementById('errorTitle').textContent = 'Failed to load trips';
+            document.getElementById('errorMessage').textContent = error.message || 'An error occurred while fetching your trips.';
+            errorState.style.display = 'block';
+        }
+    }
+
+    // Create a trip card element
+    function createTripCard(trip) {
+        const article = document.createElement('article');
+        article.className = 'trip-card';
+        article.style.cursor = 'pointer';
+        article.onclick = () => window.location.href = `/trip/${trip.id}`;
+        article.setAttribute('aria-label', 'Journey card');
+
+        // Create image element
+        const img = document.createElement('img');
+        img.alt = `${trip.title} cover`;
+        img.className = 'trip-card-image';
+        
+        if (trip.cover_image && trip.cover_image.trim()) {
+            img.src = trip.cover_image;
+        } else {
+            img.src = '/static/images/placeholder-trip.jpg';
+        }
+        
+        article.appendChild(img);
+
+        // Create content div
+        const content = document.createElement('div');
+        content.className = 'trip-card-content';
+
+        // Create title
+        const title = document.createElement('h3');
+        title.className = 'trip-card-title';
+        title.textContent = trip.title;
+        content.appendChild(title);
+
+        // Create dates
+        const dates = document.createElement('div');
+        dates.className = 'trip-card-dates';
+        const startDate = formatDateShort(trip.start_date);
+        const endDate = formatDate(trip.end_date);
+        dates.textContent = `${startDate} – ${endDate}`;
+        content.appendChild(dates);
+
+        // Create description
+        const description = document.createElement('p');
+        description.className = 'trip-card-mood';
+        description.textContent = trip.description || 'A quiet note in time';
+        content.appendChild(description);
+
+        article.appendChild(content);
+        return article;
+    }
+
+    // Load trips when page loads
+    document.addEventListener('DOMContentLoaded', loadTrips);
+</script>
+{% endblock %}

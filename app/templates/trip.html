@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ trip.title }} - Timetide{% endblock %}
+
+{% block content %}
+<div class="journey-shell">
+    <!-- Hero -->
+    <section class="journey-hero">
+        <div class="journey-hero-copy">
+            <h1 class="journey-title">{{ trip.title }}</h1>
+            <div class="journey-meta">
+                <span class="journey-location">{{ trip.location }}</span>
+                <span class="journey-dates">{{ trip.start_date.strftime('%B %d') }} – {{ trip.end_date.strftime('%B %d, %Y') }}</span>
+            </div>
+            {% if trip.description %}
+            <p class="journey-summary">{{ trip.description }}</p>
+            {% endif %}
+        </div>
+        <div class="journey-hero-cover">
+            {% if trip.cover_image %}
+            <img src="{{ trip.cover_image }}" alt="{{ trip.title }} cover" loading="lazy">
+            {% else %}
+            <img src="/static/images/placeholder-trip.jpg" alt="{{ trip.title }} cover placeholder" loading="lazy">
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Shared journey / family collaborators -->
+    <section class="journey-shared">
+        <div class="shared-header">
+            <h3>Shared memory circle</h3>
+            <p class="shared-sub">Invite family to add their own reflections and photos—no scores, just stories kept together.</p>
+        </div>
+        <div class="shared-body">
+            <div class="contrib-list">
+                <div class="contrib-chip host" title="Journey host">
+                    <span class="contrib-initial">{{ trip.owner.name[0]|upper if trip.owner and trip.owner.name else 'H' }}</span>
+                    <span class="contrib-label">Host</span>
+                </div>
+                {% set ns = namespace(seen=[]) %}
+                {% for entry in entries %}
+                    {% if entry.author and entry.author.id not in ns.seen %}
+                        {% set _ = ns.seen.append(entry.author.id) %}
+                        <div class="contrib-chip" title="Contributor">
+                            <span class="contrib-initial">{{ entry.author.name[0]|upper if entry.author and entry.author.name else 'C' }}</span>
+                            <span class="contrib-name">{{ entry.author.name }}</span>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="invite-box">
+                <input type="email" class="invite-input" placeholder="Add a family email" aria-label="Family email to invite">
+                <button type="button" class="btn btn-soft" onclick="alert('Invite sent (placeholder)')">Send invite</button>
+                <p class="invite-note">Invites stay private—contributors can write, add photos, and keep the tone intimate.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="journey-timeline">
+        {% if entries %}
+            {% set current_date = None %}
+            {% for entry in entries %}
+                {% if current_date != entry.entry_date %}
+                    {% if not loop.first %}
+                        </div>
+                    </section>
+                    {% endif %}
+                    <section class="journey-day">
+                        <div class="journey-day-header">
+                            <div class="journey-day-date">{{ entry.entry_date.strftime('%A, %B %d, %Y') }}</div>
+                        </div>
+                        <div class="journey-day-body">
+                {% endif %}
+
+                <article class="journey-entry">
+                    <div class="journey-entry-meta">
+                        <div class="contrib-chip small" title="Entry author">
+                            <span class="contrib-initial">{{ entry.author.name[0]|upper if entry.author and entry.author.name else 'C' }}</span>
+                        </div>
+                        <div class="contrib-name subtle">{{ entry.author.name }}</div>
+                    </div>
+                    <p class="journey-entry-text">{{ entry.content }}</p>
+                    {% if entry.photos %}
+                    <div class="journey-gallery">
+                        {% for photo in entry.photos %}
+                        <figure class="gallery-item">
+                            <img src="{{ photo.url }}" alt="{{ photo.caption or trip.title ~ ' photo' }}" loading="lazy">
+                            {% if photo.caption %}
+                            <figcaption>{{ photo.caption }}</figcaption>
+                            {% endif %}
+                        </figure>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </article>
+
+                {% set current_date = entry.entry_date %}
+                {% if loop.last %}
+                        </div>
+                    </section>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+        <div class="journey-empty">
+            <p class="journey-empty-line">This journey is waiting for its first note.</p>
+            <p class="journey-empty-sub">Begin with a memory, a scent, a sky—let the diary breathe to life.</p>
+            <button class="btn btn-primary">Add First Entry</button>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

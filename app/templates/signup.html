@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create account · Timetide</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .auth-container { min-height: 100vh; display: grid; place-items: center; padding: 4rem 1rem; }
+    .auth-card { width: 100%; max-width: 480px; background: var(--surface, #f7f7f5); border-radius: 16px; padding: 28px; box-shadow: var(--shadow-soft, 0 8px 24px rgba(0,0,0,0.06)); border: 1px solid var(--border, rgba(0,0,0,0.08)); }
+    .auth-title { font-family: var(--font-serif, 'Playfair Display', Georgia, serif); font-size: 1.75rem; margin: 0 0 8px; color: var(--text-strong, #1d1d1b); }
+    .auth-sub { margin: 0 0 24px; color: var(--text-muted, #5c5a57); font-size: 0.975rem; }
+    .form-field { display: grid; gap: 6px; margin-bottom: 16px; }
+    .form-field label { color: var(--text-muted, #5c5a57); font-size: 0.9rem; }
+    .form-input { appearance: none; width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border, rgba(0,0,0,0.12)); background: var(--surface-raised, #fffefd); color: var(--text, #2b2a28); outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+    .form-input:focus { border-color: var(--accent, #7aa693); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #7aa693) 20%, transparent); }
+    .btn-primary { width: 100%; padding: 12px 14px; border-radius: 12px; background: var(--accent, #7aa693); color: #0e140f; border: none; font-weight: 600; cursor: pointer; transition: transform .15s ease, filter .2s ease; }
+    .btn-primary:hover { filter: brightness(0.98); transform: translateY(-1px); }
+    .form-help { margin-top: 10px; font-size: 0.95rem; color: var(--text-muted, #5c5a57); }
+    .form-help a { color: var(--text, #2b2a28); text-underline-offset: 3px; }
+    .error-box { display: none; margin-bottom: 14px; padding: 10px 12px; border-radius: 10px; border: 1px solid color-mix(in srgb, #b84444 24%, transparent); background: color-mix(in srgb, #b84444 12%, #fff 88%); color: #6e2a2a; }
+  </style>
+</head>
+<body>
+  <main class="auth-container">
+    <section class="auth-card">
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-sub">Begin documenting your journeys with clarity and calm.</p>
+
+      <div id="error" class="error-box" role="alert"></div>
+
+      <form id="signup-form" novalidate>
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input class="form-input" type="text" id="name" name="name" autocomplete="name" required />
+        </div>
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input class="form-input" type="email" id="email" name="email" autocomplete="email" required />
+        </div>
+        <div class="form-field">
+          <label for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" autocomplete="new-password" required />
+        </div>
+        <button class="btn-primary" type="submit">Create account</button>
+        <p class="form-help">Already have an account? <a href="/login">Sign in</a>.</p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('signup-form');
+    const errorBox = document.getElementById('error');
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      if (!name || !email || !password) { showError('Please enter your name, email, and password.'); return; }
+
+      try {
+        // 1) Create user
+        const resSignup = await fetch('/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        
+        // Parse response based on content type
+        let dataSignup;
+        const contentType = resSignup.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          dataSignup = await resSignup.json().catch(() => ({}));
+        } else {
+          dataSignup = {};
+        }
+        
+        if (!resSignup.ok) {
+          // Handle different error types
+          if (resSignup.status === 422 && dataSignup.detail && Array.isArray(dataSignup.detail)) {
+            // Pydantic validation error - extract first error
+            const error = dataSignup.detail[0];
+            const field = error.loc && error.loc[error.loc.length - 1];
+            const msg = error.msg || 'Invalid input';
+            showError(`${field}: ${msg}`);
+          } else if (dataSignup.detail) {
+            showError(dataSignup.detail);
+          } else {
+            showError('Signup failed. Please check your information and try again.');
+          }
+          return;
+        }
+        
+        // 2) Immediately log in to get JWT
+        const body = new URLSearchParams({ username: email, password });
+        const resLogin = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body
+        });
+        const dataLogin = await resLogin.json().catch(() => ({}));
+        if (!resLogin.ok) {
+          const detail = (dataLogin && dataLogin.detail) || 'Auto login failed. Please try to sign in.';
+          showError(detail);
+          return;
+        }
+        const token = dataLogin && dataLogin.access_token;
+        if (!token) { showError('Missing token from server.'); return; }
+        // Store token as a cookie so it's sent automatically on subsequent requests
+        document.cookie = `timetide_token=${token}; path=/; SameSite=Strict`;
+        window.location.assign('/dashboard');
+      } catch (err) {
+        console.error('Signup error:', err);
+        showError('Network error. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}{{ day_date.strftime('%B %d, %Y') }} - {{ trip.title }} - Timetide{% endblock %}
+
+{% block content %}
+<div class="container-narrow">
+    <!-- Day Header -->
+    <div class="trip-header">
+        <p class="text-muted mb-1">
+            <a href="/trip/{{ trip.id }}" style="color: var(--accent);">← {{ trip.title }}</a>
+        </p>
+        <h1 class="trip-title">{{ day_date.strftime('%A, %B %d, %Y') }}</h1>
+    </div>
+    
+    <!-- Day Timeline -->
+    {% if entries %}
+    <div class="timeline">
+        {% for entry in entries %}
+        <div class="timeline-entry">
+            <div class="entry-time">
+                {% if entry.entry_time %}
+                    {{ entry.entry_time }}
+                {% else %}
+                    Morning
+                {% endif %}
+            </div>
+            
+            <div class="entry-content">
+                <div class="journey-entry-meta">
+                    <div class="contrib-chip small" title="Entry author">
+                        <span class="contrib-initial">{{ entry.author.name[0]|upper if entry.author and entry.author.name else 'C' }}</span>
+                    </div>
+                    <div class="contrib-name subtle">{{ entry.author.name }}</div>
+                </div>
+                <p class="entry-text">{{ entry.content }}</p>
+                
+                <!-- Photos -->
+                {% if entry.photos %}
+                    {% for photo in entry.photos %}
+                    <img src="{{ photo.url }}" alt="{{ photo.caption or 'Photo' }}" class="entry-image">
+                    {% if photo.caption %}
+                    <p class="entry-caption">{{ photo.caption }}</p>
+                    {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center mt-4">
+        <p class="text-muted">No entries for this day yet.</p>
+        <button class="btn btn-primary mt-2">Add Entry</button>
+    </div>
+    {% endif %}
+    
+    <!-- Add Entry Button -->
+    <div class="mt-4 text-center">
+        <button class="btn btn-secondary">Add Another Moment</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Handle like button clicks
+document.querySelectorAll('.like-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+        const entryId = this.dataset.entryId;
+        
+        try {
+            const response = await fetch(`/entries/${entryId}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.liked) {
+                this.classList.add('liked');
+                this.querySelector('.like-icon').textContent = '♥';
+            } else {
+                this.classList.remove('liked');
+                this.querySelector('.like-icon').textContent = '♡';
+            }
+        } catch (error) {
+            console.error('Error liking entry:', error);
+        }
+    });
+});
+</script>
+{% endblock %}
