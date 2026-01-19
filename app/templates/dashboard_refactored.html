@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Timetide{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    /* Dashboard Loading & States */
+    .dashboard-loading {
+        text-align: center;
+        padding: 5rem 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    .dashboard-spinner {
+        display: inline-block;
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 1.5rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Welcome Overlay */
+    .welcome-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(247,247,245,0.95));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 2rem;
+    }
+
+    .welcome-card {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 4rem 3rem;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 12px 48px rgba(0,0,0,0.08);
+        border: 1px solid var(--border);
+        text-align: center;
+    }
+
+    .welcome-title {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        margin: 0 0 1rem 0;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
+
+    .welcome-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin: 0 0 2rem 0;
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .welcome-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .welcome-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--accent);
+        background: transparent;
+        color: var(--accent);
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .welcome-btn:hover {
+        background: var(--accent);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .welcome-btn.primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .welcome-btn.primary:hover {
+        filter: brightness(0.95);
+    }
+
+    /* Empty State */
+    .empty-journey-card {
+        background: var(--surface);
+        border-radius: 16px;
+        padding: 3.5rem 3rem;
+        max-width: 600px;
+        margin: 4rem auto;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        border: 1px solid var(--border);
+        text-align: center;
+    }
+
+    .empty-journey-title {
+        font-family: var(--font-serif);
+        font-size: 1.75rem;
+        margin: 0 0 1rem 0;
+        color: var(--text-primary);
+        line-height: 1.3;
+    }
+
+    .empty-journey-subtitle {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin: 0 0 2.5rem 0;
+        line-height: 1.6;
+    }
+
+    .create-trip-btn {
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--accent);
+        background: var(--accent);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .create-trip-btn:hover {
+        filter: brightness(0.95);
+        transform: translateY(-2px);
+    }
+
+    .dashboard-error {
+        background: color-mix(in srgb, #d84444 12%, #fff 88%);
+        border: 1px solid color-mix(in srgb, #d84444 24%, transparent);
+        color: #6e2a2a;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin: 2rem 1.5rem;
+        text-align: center;
+    }
+
+    /* Dashboard Container */
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    /* Dashboard Header */
+    .dashboard-header {
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(122,166,147,0.08), rgba(122,166,147,0.02));
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dashboard-title {
+        font-family: var(--font-serif);
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .dashboard-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    /* Primary Trip Focus Area */
+    .primary-trip-section {
+        padding: 3rem 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .primary-trip-container {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .primary-trip-media {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--border);
+        aspect-ratio: 4 / 3;
+    }
+
+    .primary-trip-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .primary-trip-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .primary-trip-header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .primary-trip-title {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
+
+    .primary-trip-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 1rem;
+        color: var(--text-secondary);
+    }
+
+    .primary-trip-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text);
+        font-style: italic;
+    }
+
+    .primary-trip-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        padding: 2rem;
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: var(--font-serif);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+        color: var(--accent);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .primary-trip-action {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 0.875rem 1.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        filter: brightness(0.95);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: var(--surface);
+        color: var(--accent);
+        border: 1.5px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    /* All Trips Section */
+    .all-trips-section {
+        padding: 3rem 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-family: var(--font-serif);
+        font-size: 1.75rem;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .section-action {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        border: 1.5px solid var(--accent);
+        background: transparent;
+        color: var(--accent);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .section-action:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    /* Trips Grid */
+    .trips-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .trip-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .trip-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .trip-card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .trip-card-content {
+        padding: 1.5rem;
+        background: white;
+    }
+
+    .trip-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .trip-card-dates {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    .trip-card-description {
+        font-size: 0.9rem;
+        color: var(--text);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .primary-trip-container {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .primary-trip-section {
+            padding: 2rem 1.5rem;
+        }
+
+        .all-trips-section {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-title {
+            font-size: 2rem;
+        }
+
+        .primary-trip-title {
+            font-size: 1.5rem;
+        }
+
+        .primary-trip-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+        }
+
+        .trips-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome-card {
+            padding: 2.5rem 1.5rem;
+        }
+
+        .welcome-title {
+            font-size: 1.5rem;
+        }
+
+        .empty-journey-card {
+            padding: 2rem 1.5rem;
+            margin: 2rem 1rem;
+        }
+
+        .empty-journey-title {
+            font-size: 1.4rem;
+        }
+
+        .welcome-actions,
+        .primary-trip-action {
+            flex-direction: column;
+        }
+
+        .welcome-btn,
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading State -->
+<div id="loadingState" class="dashboard-loading">
+    <div class="dashboard-spinner"></div>
+    <p>Loading your journeys...</p>
+</div>
+
+<!-- Error State -->
+<div id="errorState" class="dashboard-error" style="display: none;">
+    <div id="errorTitle" style="font-weight: 600; margin-bottom: 0.5rem;">Failed to load trips</div>
+    <p id="errorMessage" style="margin: 0;">An error occurred while fetching your trips.</p>
+</div>
+
+<!-- Welcome Overlay (Unauthenticated) -->
+<div id="welcomeOverlay" class="welcome-overlay" style="display: none;">
+    <div class="welcome-card">
+        <h2 class="welcome-title">Welcome to Timetide</h2>
+        <p class="welcome-subtitle">Preserve your journeys as living archives. Every trip becomes a gentle record of where you've been and what you've discovered.</p>
+        <div class="welcome-actions">
+            <a href="/login" class="welcome-btn">Sign In</a>
+            <a href="/signup" class="welcome-btn primary">Create Account</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard (Authenticated with trips) -->
+<div id="mainDashboard" style="display: none;">
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Your Journeys</h1>
+            <p class="dashboard-subtitle">A collection of moments, carefully preserved</p>
+        </div>
+
+        <!-- Primary Trip Focus Area -->
+        <div id="primaryTripSection" class="primary-trip-section" style="display: none;">
+            <div class="primary-trip-container">
+                <!-- Media -->
+                <div class="primary-trip-media">
+                    <img id="primaryTripImage" class="primary-trip-image" src="" alt="Trip cover" />
+                </div>
+
+                <!-- Info -->
+                <div class="primary-trip-info">
+                    <div class="primary-trip-header">
+                        <h2 id="primaryTripTitle" class="primary-trip-title"></h2>
+                        <div class="primary-trip-meta">
+                            <div id="primaryTripDates"></div>
+                            <div id="primaryTripLocation"></div>
+                        </div>
+                        <p id="primaryTripDescription" class="primary-trip-description"></p>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="primary-trip-stats" id="primaryTripStats"></div>
+
+                    <!-- Actions -->
+                    <div class="primary-trip-action">
+                        <button class="btn-primary" onclick="viewTripDetail()">View Trip</button>
+                        <button class="btn-secondary" onclick="createEntry()">Add Entry</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Trips Section -->
+        <div id="allTripsSection" class="all-trips-section" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title">All Journeys</h2>
+                <button class="section-action" onclick="window.location.href='/trip/new'">+ New Trip</button>
+            </div>
+            <div id="tripsGrid" class="trips-grid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Empty State (Authenticated without trips) -->
+<div id="emptyState" style="display: none;">
+    <div class="empty-journey-card">
+        <h2 class="empty-journey-title">Every journey begins with a first quiet step.</h2>
+        <p class="empty-journey-subtitle">Start a trip and watch your days unfold into a living archive—gentle, honest, and yours.</p>
+        <button class="create-trip-btn" onclick="window.location.href='/trip/new'">Create Your First Trip</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Get auth token from cookie
+    function getAuthToken() {
+        const name = 'timetide_token=';
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookieArray = decodedCookie.split(';');
+        for (let cookie of cookieArray) {
+            cookie = cookie.trim();
+            if (cookie.indexOf(name) === 0) {
+                return cookie.substring(name.length);
+            }
+        }
+        return null;
+    }
+
+    // Check if user is authenticated (backend context)
+    const isAuthenticated = {{ is_authenticated|lower }};
+    let allTrips = [];
+    let primaryTrip = null;
+
+    // Format date for display
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+        return formatter.format(date);
+    }
+
+    function formatDateShort(dateString) {
+        const date = new Date(dateString);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            month: 'long',
+            day: 'numeric'
+        });
+        return formatter.format(date);
+    }
+
+    function formatDateRange(startDate, endDate) {
+        return `${formatDateShort(startDate)} – ${formatDate(endDate)}`;
+    }
+
+    // Calculate days in trip
+    function calculateDays(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    // Render primary trip
+    function renderPrimaryTrip(trip) {
+        primaryTrip = trip;
+        const section = document.getElementById('primaryTripSection');
+        
+        // Image
+        const img = document.getElementById('primaryTripImage');
+        img.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
+        img.alt = `${trip.title} cover`;
+
+        // Title and Meta
+        document.getElementById('primaryTripTitle').textContent = trip.title;
+        document.getElementById('primaryTripDates').textContent = formatDateRange(trip.start_date, trip.end_date);
+        document.getElementById('primaryTripLocation').textContent = trip.location;
+        
+        // Description
+        const desc = document.getElementById('primaryTripDescription');
+        desc.textContent = trip.description || 'A journey preserved in time';
+        desc.style.display = trip.description ? 'block' : 'none';
+
+        // Statistics
+        const statsContainer = document.getElementById('primaryTripStats');
+        statsContainer.innerHTML = `
+            <div class="stat-item">
+                <div class="stat-value">${calculateDays(trip.start_date, trip.end_date)}</div>
+                <div class="stat-label">Days</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${trip.statistics?.num_entries || 0}</div>
+                <div class="stat-label">Entries</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${trip.statistics?.num_photos || 0}</div>
+                <div class="stat-label">Photos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${trip.statistics?.num_locations || 0}</div>
+                <div class="stat-label">Locations</div>
+            </div>
+        `;
+
+        section.style.display = 'block';
+    }
+
+    // Render all trips grid
+    function renderTripsGrid(trips) {
+        const grid = document.getElementById('tripsGrid');
+        grid.innerHTML = '';
+
+        // Skip primary trip from grid
+        const otherTrips = trips.filter(t => !primaryTrip || t.id !== primaryTrip.id);
+
+        otherTrips.forEach(trip => {
+            const card = createTripCard(trip);
+            grid.appendChild(card);
+        });
+
+        if (otherTrips.length > 0) {
+            document.getElementById('allTripsSection').style.display = 'block';
+        }
+    }
+
+    // Create trip card
+    function createTripCard(trip) {
+        const article = document.createElement('article');
+        article.className = 'trip-card';
+        article.onclick = () => window.location.href = `/trip/${trip.id}`;
+
+        const img = document.createElement('img');
+        img.alt = `${trip.title} cover`;
+        img.className = 'trip-card-image';
+        img.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
+        article.appendChild(img);
+
+        const content = document.createElement('div');
+        content.className = 'trip-card-content';
+
+        const title = document.createElement('h3');
+        title.className = 'trip-card-title';
+        title.textContent = trip.title;
+        content.appendChild(title);
+
+        const dates = document.createElement('div');
+        dates.className = 'trip-card-dates';
+        dates.textContent = formatDateRange(trip.start_date, trip.end_date);
+        content.appendChild(dates);
+
+        const description = document.createElement('p');
+        description.className = 'trip-card-description';
+        description.textContent = trip.description || 'A quiet note in time';
+        content.appendChild(description);
+
+        article.appendChild(content);
+        return article;
+    }
+
+    // View trip detail
+    function viewTripDetail() {
+        if (primaryTrip) {
+            window.location.href = `/trip/${primaryTrip.id}`;
+        }
+    }
+
+    // Create entry
+    function createEntry() {
+        if (primaryTrip) {
+            window.location.href = `/trip/${primaryTrip.id}/entry/new`;
+        }
+    }
+
+    // Load trips
+    async function loadTrips() {
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const welcomeOverlay = document.getElementById('welcomeOverlay');
+        const mainDashboard = document.getElementById('mainDashboard');
+        const emptyState = document.getElementById('emptyState');
+
+        // Reset all
+        loadingState.style.display = 'block';
+        errorState.style.display = 'none';
+        welcomeOverlay.style.display = 'none';
+        mainDashboard.style.display = 'none';
+        emptyState.style.display = 'none';
+
+        // Handle unauthenticated
+        if (!isAuthenticated) {
+            loadingState.style.display = 'none';
+            welcomeOverlay.style.display = 'flex';
+            return;
+        }
+
+        try {
+            const response = await fetch('/trips/', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            allTrips = await response.json();
+
+            if (allTrips.length === 0) {
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+            } else {
+                loadingState.style.display = 'none';
+                mainDashboard.style.display = 'block';
+                
+                // Set primary trip as most recent
+                renderPrimaryTrip(allTrips[0]);
+                renderTripsGrid(allTrips);
+            }
+        } catch (error) {
+            console.error('Error loading trips:', error);
+            loadingState.style.display = 'none';
+            document.getElementById('errorTitle').textContent = 'Failed to load trips';
+            document.getElementById('errorMessage').textContent = error.message;
+            errorState.style.display = 'block';
+        }
+    }
+
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', loadTrips);
+</script>
+{% endblock %}

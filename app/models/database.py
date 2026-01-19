@@ -116,8 +116,55 @@ class Trip(Base):
     families = relationship('Family', secondary=family_trips, back_populates='trips')
     media = relationship('TripMedia', back_populates='trip', cascade='all, delete-orphan')
     
+    @property
+    def num_days(self):
+        """Calculate the number of days in the trip."""
+        return (self.end_date - self.start_date).days + 1
+    
+    @property
+    def num_entries(self):
+        """Get the number of entries in this trip."""
+        return len(self.entries)
+    
+    @property
+    def num_photos(self):
+        """Get the total number of photos across all entries."""
+        return sum(len(entry.photos) for entry in self.entries)
+    
+    @property
+    def num_locations(self):
+        """Get the number of unique locations in this trip."""
+        unique_locations = set()
+        for entry in self.entries:
+            if entry.location and entry.location.place_name:
+                unique_locations.add(entry.location.place_name)
+        return len(unique_locations)
+    
+    @property
+    def contributors(self):
+        """Get list of unique contributors (family members who authored entries)."""
+        contributor_ids = set(entry.author_id for entry in self.entries)
+        return [entry.author for entry in self.entries if entry.author_id in contributor_ids]
+    
     def __repr__(self):
         return f"<Trip {self.title}>"
+
+
+class Location(Base):
+    """Location model for geographic data of entries."""
+    __tablename__ = 'locations'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    place_name = Column(String(255), nullable=True)  # e.g., "Eiffel Tower, Paris"
+    latitude = Column(String(50), nullable=True)  # Stored as string for precision
+    longitude = Column(String(50), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    entries = relationship('Entry', back_populates='location')
+    
+    def __repr__(self):
+        return f"<Location {self.place_name}>"
 
 
 class Entry(Base):
@@ -134,10 +181,12 @@ class Entry(Base):
     # Foreign keys
     trip_id = Column(Integer, ForeignKey('trips.id'), nullable=False)
     author_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    location_id = Column(Integer, ForeignKey('locations.id'), nullable=True)
     
     # Relationships
     trip = relationship('Trip', back_populates='entries')
     author = relationship('User', back_populates='entries')
+    location = relationship('Location', back_populates='entries')
     photos = relationship('Photo', back_populates='entry', cascade='all, delete-orphan')
     likes = relationship('Like', back_populates='entry', cascade='all, delete-orphan')
     

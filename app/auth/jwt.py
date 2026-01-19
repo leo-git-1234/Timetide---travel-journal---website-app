@@ -7,30 +7,46 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
+import os
+import hashlib
 
 from app.models import get_db
 from app.models.database import User
 
+# Load environment variables
+load_dotenv()
+
 # Configuration
-SECRET_KEY = "your-secret-key-here-change-in-production"  # TODO: Move to environment variable
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use argon2 which doesn't have the 72-byte limitation
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # OAuth2 scheme for token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
+def _preprocess_password(password: str) -> str:
+    """Pre-hash very long passwords with SHA256 for consistency."""
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 512:  # Pre-hash only if extremely long
+        return hashlib.sha256(password_bytes).hexdigest()
+    return password
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    preprocessed = _preprocess_password(plain_password)
+    return pwd_context.verify(preprocessed, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
-    """Hash a password."""
-    return pwd_context.hash(password)
+    """Hash a password with support for any length."""
+    preprocessed = _preprocess_password(password)
+    return pwd_context.hash(preprocessed)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -81,9 +97,12 @@ async def get_current_user(
     return user
 
 
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    """Authenticate a user by email and password."""
-    user = db.query(User).filter(User.email == email).first()
+def authenticate_user(db: Session, username_or_email: str, password: str) -> Optional[User]:
+    """Authenticate a user by username or email and password."""
+    # Try to find user by email first, then by username
+    user = db.query(User).filter(User.email == username_or_email).first()
+    if not user:
+        user = db.query(User).filter(User.username == username_or_email).first()
     if not user:
         return None
     if not verify_password(password, user.hashed_password):

@@ -99,12 +99,12 @@ async def trip_root_redirect():
 
 @app.get("/dashboard")
 async def dashboard(request: Request, db: Session = Depends(get_db)):
-    """Display dashboard as primary entry point. Shows welcome card for unauthenticated users."""
+    """Display rich dashboard with featured trip and journey grid."""
     # Get current user from request (don't redirect if not authenticated)
     current_user = get_current_user_from_request(request, db)
 
     return templates.TemplateResponse(
-        "dashboard.html",
+        "dashboard_refactored.html",
         {
             "request": request,
             "current_user": current_user,
@@ -155,7 +155,7 @@ async def logout(request: Request, response_class=None):
 
 @app.get("/trip/new")
 async def create_trip_page(request: Request, db: Session = Depends(get_db)):
-    """Render the create new trip page."""
+    """Render the enhanced create trip page."""
     # Get current user from request
     current_user = get_current_user_from_request(request, db)
     
@@ -183,38 +183,42 @@ async def trip_view(trip_id: int, request: Request, db: Session = Depends(get_db
     if not current_user:
         return RedirectResponse(url="/login", status_code=302)
     
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
-    
-    if not trip:
-        return templates.TemplateResponse(
-            "404.html",
-            {"request": request},
-            status_code=404
-        )
-    
-    # Verify user owns this trip
-    if trip.owner_id != current_user.id:
-        return templates.TemplateResponse(
-            "404.html",
-            {"request": request},
-            status_code=403
-        )
-    
-    # Get all entries for this trip
-    entries_list = db.query(Entry).filter(
-        Entry.trip_id == trip_id
-    ).order_by(Entry.entry_date, Entry.entry_time).all()
-    
-    # Get unique dates with entries
-    dates_with_entries = set(entry.entry_date for entry in entries_list)
-    
+    # Just pass the trip_id to the template, let JavaScript fetch the full data
     return templates.TemplateResponse(
-        "trip.html",
+        "trip_detail.html",
         {
             "request": request,
-            "trip": trip,
-            "entries": entries_list,
-            "dates_with_entries": dates_with_entries,
+            "trip_id": trip_id,
+            "active_page": "dashboard",
+            "current_user": current_user
+        }
+    )
+
+
+@app.get("/trip/{trip_id}/entry/new")
+async def create_entry_page(trip_id: int, request: Request, db: Session = Depends(get_db)):
+    """Render the create entry page."""
+    # Get current user from request
+    current_user = get_current_user_from_request(request, db)
+    
+    # Redirect to login if not authenticated
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=302)
+    
+    # Verify trip exists and user has access
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+    
+    # Only owner can add entries (for now)
+    if trip.owner_id != current_user.id:
+        return templates.TemplateResponse("404.html", {"request": request}, status_code=403)
+    
+    return templates.TemplateResponse(
+        "create_entry.html",
+        {
+            "request": request,
+            "trip_id": trip_id,
             "active_page": "dashboard",
             "current_user": current_user
         }

@@ -1,0 +1,853 @@
+{% extends "base.html" %}
+
+{% block title %}{{ trip.title }} - Timetide{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    /* Trip Detail Page - Editorial Layout */
+    .trip-detail-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    /* Hero Section - Cinematic Cover */
+    .trip-hero {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        overflow: hidden;
+        margin-bottom: 3rem;
+    }
+
+    .trip-hero-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .trip-hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        padding: 3rem 2rem 2rem;
+        color: white;
+    }
+
+    .trip-title {
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: 3rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.1;
+    }
+
+    .trip-meta {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .trip-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Main Content Grid */
+    .trip-content-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 3rem;
+        padding: 0 2rem;
+        margin-bottom: 4rem;
+    }
+
+    /* Statistics Panel */
+    .trip-stats {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border, #E0D8CF);
+        margin-bottom: 2rem;
+    }
+
+    .trip-stats-title {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        margin: 0 0 1.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 600;
+        color: var(--accent, #6E8C78);
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #6A655D);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Calendar Widget */
+    .calendar-widget {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border, #E0D8CF);
+        margin-bottom: 2rem;
+    }
+
+    .calendar-header {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        margin: 0 0 1.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .calendar-days {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: var(--bg-primary, #F7F4EF);
+        border: 1px solid transparent;
+    }
+
+    .calendar-day.has-entry {
+        background: var(--accent, #6E8C78);
+        color: white;
+        font-weight: 600;
+    }
+
+    .calendar-day:hover {
+        border-color: var(--accent, #6E8C78);
+    }
+
+    .calendar-day.today {
+        border: 2px solid var(--accent, #6E8C78);
+    }
+
+    /* Map Widget */
+    .map-widget {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border, #E0D8CF);
+        margin-bottom: 2rem;
+    }
+
+    .map-header {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        margin: 0;
+        padding: 2rem 2rem 1rem;
+        color: var(--text-primary);
+    }
+
+    #trip-map {
+        height: 300px;
+        width: 100%;
+    }
+
+    /* Activity Panel */
+    .activity-panel {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border, #E0D8CF);
+    }
+
+    .activity-header {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        margin: 0 0 1.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .contributor-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .contributor-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .contributor-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent, #6E8C78);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .contributor-info {
+        flex: 1;
+    }
+
+    .contributor-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .contributor-count {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    /* Journal Timeline */
+    .journal-timeline {
+        flex: 1;
+    }
+
+    .timeline-header {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        margin: 0 0 2rem 0;
+        color: var(--text-primary);
+    }
+
+    .day-group {
+        margin-bottom: 3rem;
+    }
+
+    .day-header {
+        font-family: var(--font-serif);
+        font-size: 1.5rem;
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border, #E0D8CF);
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .day-date {
+        flex: 1;
+    }
+
+    .day-location {
+        font-size: 1rem;
+        font-family: var(--font-sans);
+        font-weight: 400;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .entry-card {
+        background: var(--surface, #FDFBF7);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border, #E0D8CF);
+    }
+
+    .entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .entry-author {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .entry-author-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--accent, #6E8C78);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .entry-author-name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .entry-time {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .entry-content {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .entry-photos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .entry-photo {
+        width: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+        aspect-ratio: 4/3;
+    }
+
+    .entry-location {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border, #E0D8CF);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    /* Empty state */
+    .empty-entries {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-entries-title {
+        font-family: var(--font-serif);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .add-entry-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent, #6E8C78);
+        color: white;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .add-entry-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .trip-content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+            order: -1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .trip-hero {
+            height: 300px;
+        }
+
+        .trip-title {
+            font-size: 2rem;
+        }
+
+        .trip-content-grid {
+            padding: 0 1rem;
+        }
+
+        .stat-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trip-detail-container">
+    <div id="tripMeta" data-trip-id="{{ trip_id }}" style="display:none"></div>
+    <!-- Loading State -->
+    <div id="loadingState" style="text-align: center; padding: 4rem;">
+        <div style="font-size: 1.2rem; color: var(--text-secondary);">Loading trip...</div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" style="display: none; text-align: center; padding: 4rem;">
+        <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Trip not found</h2>
+        <p style="color: var(--text-secondary);">This trip may have been deleted or you don't have access to it.</p>
+        <a href="/dashboard" style="display: inline-block; margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: var(--accent); color: white; text-decoration: none; border-radius: 8px;">Return to Dashboard</a>
+    </div>
+
+    <!-- Trip Content -->
+    <div id="tripContent" style="display: none;">
+        <!-- Hero Section -->
+        <div class="trip-hero">
+            <img id="tripCover" src="" alt="Trip cover" class="trip-hero-image">
+            <div class="trip-hero-overlay">
+                <h1 id="tripTitle" class="trip-title"></h1>
+                <div class="trip-meta">
+                    <div class="trip-meta-item">
+                        <span>📍</span>
+                        <span id="tripLocation"></span>
+                    </div>
+                    <div class="trip-meta-item">
+                        <span>📅</span>
+                        <span id="tripDates"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="trip-content-grid">
+            <!-- Timeline -->
+            <div class="journal-timeline">
+                <h2 class="timeline-header">Daily Journal</h2>
+                <div id="entriesContainer"></div>
+                
+                <!-- Empty State -->
+                <div id="emptyEntries" class="empty-entries" style="display: none;">
+                    <h3 class="empty-entries-title">No entries yet</h3>
+                    <p>Start documenting your journey by adding your first entry.</p>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Statistics -->
+                <div class="trip-stats">
+                    <h3 class="trip-stats-title">Trip Overview</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <div id="statDays" class="stat-value">0</div>
+                            <div class="stat-label">Days</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="statEntries" class="stat-value">0</div>
+                            <div class="stat-label">Entries</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="statPhotos" class="stat-value">0</div>
+                            <div class="stat-label">Photos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div id="statLocations" class="stat-value">0</div>
+                            <div class="stat-label">Places</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Widget -->
+                <div class="calendar-widget">
+                    <h3 class="calendar-header">Calendar</h3>
+                    <div id="calendarDays" class="calendar-days"></div>
+                </div>
+
+                <!-- Map Widget -->
+                <div class="map-widget" id="mapWidget" style="display: none;">
+                    <h3 class="map-header">Journey Map</h3>
+                    <div id="trip-map"></div>
+                </div>
+
+                <!-- Contributors -->
+                <div class="activity-panel" id="activityPanel" style="display: none;">
+                    <h3 class="activity-header">Contributors</h3>
+                    <div id="contributorsList" class="contributor-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Add Button -->
+<button class="add-entry-btn" onclick="addNewEntry()" title="Add new entry">+</button>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const tripId = document.getElementById('tripMeta').dataset.tripId;
+    let tripData = null;
+    let map = null;
+
+    // Load trip data
+    async function loadTrip() {
+        try {
+            const response = await fetch(`/trips/${tripId}`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load trip');
+            }
+
+            tripData = await response.json();
+            renderTrip(tripData);
+        } catch (error) {
+            console.error('Error loading trip:', error);
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        }
+    }
+
+    // Render trip data
+    function renderTrip(trip) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('tripContent').style.display = 'block';
+
+        // Hero section
+        document.getElementById('tripTitle').textContent = trip.title;
+        document.getElementById('tripLocation').textContent = trip.location;
+        document.getElementById('tripDates').textContent = formatDateRange(trip.start_date, trip.end_date);
+        
+        const coverImg = document.getElementById('tripCover');
+        coverImg.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
+
+        // Statistics
+        document.getElementById('statDays').textContent = trip.statistics.num_days;
+        document.getElementById('statEntries').textContent = trip.statistics.num_entries;
+        document.getElementById('statPhotos').textContent = trip.statistics.num_photos;
+        document.getElementById('statLocations').textContent = trip.statistics.num_locations;
+
+        // Calendar
+        renderCalendar(trip);
+
+        // Entries
+        if (trip.entries && trip.entries.length > 0) {
+            renderEntries(trip.entries);
+            renderMap(trip.entries);
+        } else {
+            document.getElementById('emptyEntries').style.display = 'block';
+        }
+
+        // Contributors
+        if (trip.contributors && trip.contributors.length > 0) {
+            renderContributors(trip.contributors, trip.entries);
+        }
+    }
+
+    // Render entries grouped by date
+    function renderEntries(entries) {
+        const container = document.getElementById('entriesContainer');
+        container.innerHTML = '';
+
+        // Group entries by date
+        const grouped = {};
+        entries.forEach(entry => {
+            const date = entry.entry_date;
+            if (!grouped[date]) {
+                grouped[date] = [];
+            }
+            grouped[date].push(entry);
+        });
+
+        // Render each day group
+        Object.keys(grouped).sort().reverse().forEach(date => {
+            const dayGroup = document.createElement('div');
+            dayGroup.className = 'day-group';
+            dayGroup.id = `day-${date}`;
+
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header';
+            
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'day-date';
+            dateSpan.textContent = formatDate(date);
+            dayHeader.appendChild(dateSpan);
+
+            // Add location if available
+            const firstEntryWithLocation = grouped[date].find(e => e.location);
+            if (firstEntryWithLocation && firstEntryWithLocation.location) {
+                const locationSpan = document.createElement('span');
+                locationSpan.className = 'day-location';
+                locationSpan.textContent = firstEntryWithLocation.location.place_name;
+                dayHeader.appendChild(locationSpan);
+            }
+
+            dayGroup.appendChild(dayHeader);
+
+            // Render entries for this day
+            grouped[date].forEach(entry => {
+                dayGroup.appendChild(createEntryCard(entry));
+            });
+
+            container.appendChild(dayGroup);
+        });
+    }
+
+    // Create entry card
+    function createEntryCard(entry) {
+        const card = document.createElement('div');
+        card.className = 'entry-card';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'entry-header';
+
+        const author = document.createElement('div');
+        author.className = 'entry-author';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'entry-author-avatar';
+        avatar.textContent = entry.author.name.charAt(0).toUpperCase();
+        
+        const name = document.createElement('span');
+        name.className = 'entry-author-name';
+        name.textContent = entry.author.name;
+        
+        author.appendChild(avatar);
+        author.appendChild(name);
+        header.appendChild(author);
+
+        if (entry.entry_time) {
+            const time = document.createElement('span');
+            time.className = 'entry-time';
+            time.textContent = entry.entry_time;
+            header.appendChild(time);
+        }
+
+        card.appendChild(header);
+
+        // Content
+        const content = document.createElement('div');
+        content.className = 'entry-content';
+        content.textContent = entry.content;
+        card.appendChild(content);
+
+        // Photos
+        if (entry.photos && entry.photos.length > 0) {
+            const photosGrid = document.createElement('div');
+            photosGrid.className = 'entry-photos';
+            
+            entry.photos.forEach(photo => {
+                const img = document.createElement('img');
+                img.src = photo.url;
+                img.alt = photo.caption || 'Entry photo';
+                img.className = 'entry-photo';
+                photosGrid.appendChild(img);
+            });
+            
+            card.appendChild(photosGrid);
+        }
+
+        // Location
+        if (entry.location && entry.location.place_name) {
+            const location = document.createElement('div');
+            location.className = 'entry-location';
+            location.innerHTML = `📍 ${entry.location.place_name}`;
+            card.appendChild(location);
+        }
+
+        return card;
+    }
+
+    // Render calendar
+    function renderCalendar(trip) {
+        const container = document.getElementById('calendarDays');
+        const startDate = new Date(trip.start_date);
+        const endDate = new Date(trip.end_date);
+        const today = new Date();
+        
+        // Get entry dates
+        const entryDates = new Set(trip.entries.map(e => e.entry_date));
+
+        // Calculate days to show
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        
+        for (let i = 0; i < totalDays; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const day = document.createElement('div');
+            day.className = 'calendar-day';
+            day.textContent = currentDate.getDate();
+            
+            const dateStr = currentDate.toISOString().split('T')[0];
+            if (entryDates.has(dateStr)) {
+                day.classList.add('has-entry');
+                day.onclick = () => scrollToDay(dateStr);
+            }
+            
+            if (isSameDay(currentDate, today)) {
+                day.classList.add('today');
+            }
+            
+            container.appendChild(day);
+        }
+    }
+
+    // Render map
+    function renderMap(entries) {
+        const locations = entries.filter(e => e.location && e.location.latitude && e.location.longitude);
+        
+        if (locations.length === 0) return;
+
+        document.getElementById('mapWidget').style.display = 'block';
+        
+        setTimeout(() => {
+            map = L.map('trip-map').setView([
+                parseFloat(locations[0].location.latitude),
+                parseFloat(locations[0].location.longitude)
+            ], 10);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Add markers
+            locations.forEach(entry => {
+                const marker = L.marker([
+                    parseFloat(entry.location.latitude),
+                    parseFloat(entry.location.longitude)
+                ]).addTo(map);
+                
+                marker.bindPopup(`<b>${entry.location.place_name}</b><br>${formatDate(entry.entry_date)}`);
+            });
+
+            // Fit bounds
+            if (locations.length > 1) {
+                const bounds = locations.map(e => [
+                    parseFloat(e.location.latitude),
+                    parseFloat(e.location.longitude)
+                ]);
+                map.fitBounds(bounds);
+            }
+        }, 100);
+    }
+
+    // Render contributors
+    function renderContributors(contributors, entries) {
+        document.getElementById('activityPanel').style.display = 'block';
+        const container = document.getElementById('contributorsList');
+        
+        contributors.forEach(contributor => {
+            const count = entries.filter(e => e.author.id === contributor.id).length;
+            
+            const item = document.createElement('div');
+            item.className = 'contributor-item';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'contributor-avatar';
+            avatar.textContent = contributor.name.charAt(0).toUpperCase();
+            
+            const info = document.createElement('div');
+            info.className = 'contributor-info';
+            
+            const name = document.createElement('div');
+            name.className = 'contributor-name';
+            name.textContent = contributor.name;
+            
+            const countText = document.createElement('div');
+            countText.className = 'contributor-count';
+            countText.textContent = `${count} ${count === 1 ? 'entry' : 'entries'}`;
+            
+            info.appendChild(name);
+            info.appendChild(countText);
+            
+            item.appendChild(avatar);
+            item.appendChild(info);
+            
+            container.appendChild(item);
+        });
+    }
+
+    // Utility functions
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    function formatDateRange(start, end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const startStr = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        const endStr = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        return `${startStr} – ${endStr}`;
+    }
+
+    function isSameDay(d1, d2) {
+        return d1.getFullYear() === d2.getFullYear() &&
+               d1.getMonth() === d2.getMonth() &&
+               d1.getDate() === d2.getDate();
+    }
+
+    function scrollToDay(date) {
+        const dayElement = document.getElementById(`day-${date}`);
+        if (dayElement) {
+            dayElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function addNewEntry() {
+        // TODO: Open entry creation modal
+        alert('Entry creation interface coming soon!');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadTrip);
+</script>
+{% endblock %}

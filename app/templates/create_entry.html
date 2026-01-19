@@ -1,21 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}Create New Trip - Timetide{% endblock %}
+{% block title %}New Entry - Timetide{% endblock %}
 
 {% block extra_css %}
 <style>
-    .create-trip-container {
+    .create-entry-container {
         max-width: 800px;
         margin: 3rem auto;
         padding: 0 1.5rem;
     }
 
-    .create-trip-header {
+    .create-entry-header {
         text-align: center;
         margin-bottom: 3rem;
     }
 
-    .create-trip-header h1 {
+    .create-entry-header h1 {
         font-family: var(--font-serif);
         font-size: 2.5rem;
         color: var(--text-primary);
@@ -23,12 +23,12 @@
         font-weight: 700;
     }
 
-    .create-trip-header p {
+    .create-entry-header p {
         color: var(--text-secondary);
         font-size: 1.1rem;
     }
 
-    .trip-form {
+    .entry-form {
         background: var(--surface);
         padding: 3rem;
         border-radius: 12px;
@@ -68,6 +68,7 @@
         background: var(--surface);
         color: var(--text-primary);
         transition: var(--transition);
+        box-sizing: border-box;
     }
 
     .form-input:focus,
@@ -80,35 +81,11 @@
 
     .form-textarea {
         resize: vertical;
-        min-height: 120px;
+        min-height: 200px;
         font-family: var(--font-sans);
     }
 
-    .date-group {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-
     .form-helper {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        margin-top: 0.5rem;
-    }
-
-    .image-preview-container {
-        margin-top: 1rem;
-    }
-
-    .image-preview {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-
-    .image-preview-label {
-        display: block;
         font-size: 0.875rem;
         color: var(--text-secondary);
         margin-top: 0.5rem;
@@ -217,27 +194,16 @@
         transform: scale(1.1);
     }
 
-    .media-item-btn.cover {
-        background: var(--accent);
-        color: white;
+    .date-time-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
     }
 
-    .media-item-badge {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: var(--accent);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .media-empty-state {
-        text-align: center;
-        color: var(--text-secondary);
-        padding: 2rem;
+    .location-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
     }
 
     .form-actions {
@@ -340,16 +306,17 @@
     }
 
     @media (max-width: 768px) {
-        .create-trip-container {
+        .create-entry-container {
             margin: 2rem auto;
             padding: 0 1rem;
         }
 
-        .trip-form {
+        .entry-form {
             padding: 2rem;
         }
 
-        .date-group {
+        .date-time-group,
+        .location-group {
             grid-template-columns: 1fr;
         }
 
@@ -366,135 +333,126 @@
 {% endblock %}
 
 {% block content %}
-<div class="create-trip-container">
+<div class="create-entry-container">
     <!-- Header -->
-    <div class="create-trip-header">
-        <h1>Begin a New Journey</h1>
-        <p>Document your travels, one moment at a time</p>
+    <div class="create-entry-header">
+        <h1>New Entry</h1>
+        <p>Record this moment</p>
     </div>
 
     <!-- Messages -->
     <div class="error-message" id="errorMessage"></div>
     <div class="success-message" id="successMessage"></div>
 
-    <!-- Create Trip Form -->
-    <form class="trip-form" id="createTripForm">
-        <!-- Title -->
+    <!-- Create Entry Form -->
+    <form class="entry-form" id="createEntryForm">
+        <!-- Content -->
         <div class="form-group">
-            <label class="form-label" for="title">
-                Trip Title <span class="required">*</span>
-            </label>
-            <input
-                type="text"
-                id="title"
-                name="title"
-                class="form-input"
-                placeholder="e.g., Summer in Tuscany"
-                required
-                minlength="1"
-                maxlength="255"
-            />
-            <p class="form-helper">Give your journey a meaningful name</p>
-        </div>
-
-        <!-- Description -->
-        <div class="form-group">
-            <label class="form-label" for="description">
-                Description
+            <label class="form-label" for="content">
+                Your Reflection <span class="required">*</span>
             </label>
             <textarea
-                id="description"
-                name="description"
+                id="content"
+                name="content"
                 class="form-textarea"
-                placeholder="What inspired this trip? What do you hope to remember?"
-                maxlength="2000"
+                placeholder="What did you experience today? What caught your eye or heart?"
+                required
+                minlength="1"
             ></textarea>
-            <p class="form-helper">Share the story behind this journey (optional)</p>
+            <p class="form-helper">Share your thoughts, observations, and feelings</p>
         </div>
 
-        <!-- Dates -->
+        <!-- Date and Time -->
         <div class="form-group">
-            <label class="form-label">Trip Dates</label>
-            <div class="date-group">
+            <label class="form-label">When</label>
+            <div class="date-time-group">
                 <div>
-                    <label class="form-label" for="startDate" style="margin-bottom: 0.5rem;">
-                        Start Date <span class="required">*</span>
+                    <label class="form-label" for="entryDate" style="margin-bottom: 0.5rem;">
+                        Date <span class="required">*</span>
                     </label>
                     <input
                         type="date"
-                        id="startDate"
-                        name="startDate"
+                        id="entryDate"
+                        name="entryDate"
                         class="form-input"
                         required
                     />
                 </div>
                 <div>
-
-            <!-- Location -->
-            <div class="form-group">
-                <label class="form-label" for="location">
-                    Location <span class="required">*</span>
-                </label>
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    class="form-input"
-                    placeholder="City, Region or Country"
-                    required
-                />
-                <p class="form-helper">Where is this trip taking place?</p>
-            </div>
-                    <label class="form-label" for="endDate" style="margin-bottom: 0.5rem;">
-                        End Date <span class="required">*</span>
+                    <label class="form-label" for="entryTime" style="margin-bottom: 0.5rem;">
+                        Time (optional)
                     </label>
                     <input
-                        type="date"
-                        id="endDate"
-                        name="endDate"
+                        type="time"
+                        id="entryTime"
+                        name="entryTime"
                         class="form-input"
-                        required
                     />
                 </div>
             </div>
-            <p class="form-helper">Mark the beginning and end of your journey</p>
+            <p class="form-helper">When did this moment happen?</p>
         </div>
 
-        <!-- Cover Image -->
+        <!-- Location -->
         <div class="form-group">
-            <label class="form-label" for="coverImage">
-                Cover Image
-            </label>
-            <input
-                type="file"
-                id="coverImage"
-                name="coverImage"
-                class="form-file"
-                accept="image/*"
-            />
-            <p class="form-helper">Choose a memorable photo to represent this trip (optional). Or upload it in the media section below.</p>
-            <div class="image-preview-container" id="imagePreview" style="display: none;">
-                <img id="previewImg" src="" alt="Cover preview" class="image-preview" />
-                <p class="image-preview-label">Image preview</p>
+            <label class="form-label">Where</label>
+            <div class="location-group">
+                <div>
+                    <label class="form-label" for="locationName" style="margin-bottom: 0.5rem;">
+                        Place Name
+                    </label>
+                    <input
+                        type="text"
+                        id="locationName"
+                        name="locationName"
+                        class="form-input"
+                        placeholder="e.g., Eiffel Tower, Paris"
+                    />
+                </div>
+                <div>
+                    <label class="form-label" for="latitude" style="margin-bottom: 0.5rem;">
+                        Latitude
+                    </label>
+                    <input
+                        type="text"
+                        id="latitude"
+                        name="latitude"
+                        class="form-input"
+                        placeholder="e.g., 48.8584"
+                    />
+                </div>
+                <div>
+                    <label class="form-label" for="longitude" style="margin-bottom: 0.5rem;">
+                        Longitude
+                    </label>
+                    <input
+                        type="text"
+                        id="longitude"
+                        name="longitude"
+                        class="form-input"
+                        placeholder="e.g., 2.2945"
+                    />
+                </div>
             </div>
+            <p class="form-helper">Where was this moment? (optional)</p>
         </div>
 
         <!-- Media Upload Section -->
         <div class="form-group">
-            <label class="form-label">Add Photos & Videos</label>
+            <label class="form-label">Add Photos</label>
             <div class="media-upload-section" id="mediaUploadSection">
                 <div class="media-upload-icon">📸</div>
                 <div class="media-upload-text">Click to upload or drag and drop</div>
-                <div class="media-upload-subtext">Photos (JPG, PNG, GIF) and Videos (MP4, WebM)</div>
+                <div class="media-upload-subtext">Photos (JPG, PNG, GIF)</div>
             </div>
             <input
                 type="file"
                 id="mediaInput"
                 name="mediaInput"
                 multiple
-                accept="image/*,video/*"
+                accept="image/*"
             />
-            <p class="form-helper">Add as many photos and videos as you'd like. Select one as your trip cover.</p>
+            <p class="form-helper">Add photos to accompany your reflection</p>
 
             <!-- Media Gallery -->
             <div id="mediaGallery" class="media-gallery" style="display: none;"></div>
@@ -503,16 +461,16 @@
         <!-- Loading Indicator -->
         <div class="loading" id="loadingIndicator">
             <div class="spinner"></div>
-            <p>Creating your trip...</p>
+            <p>Creating entry...</p>
         </div>
 
         <!-- Form Actions -->
         <div class="form-actions">
-            <button type="button" class="btn-cancel" onclick="window.history.back()">
+            <button type="button" class="btn-cancel" onclick="goBack()">
                 Cancel
             </button>
             <button type="submit" class="btn-submit" id="submitBtn">
-                Create Trip
+                Save Entry
             </button>
         </div>
     </form>
@@ -521,23 +479,27 @@
 
 {% block extra_js %}
 <script>
-    const form = document.getElementById('createTripForm');
-    const titleInput = document.getElementById('title');
-    const locationInput = document.getElementById('location');
-    const descriptionInput = document.getElementById('description');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
+    // Get trip ID from URL
+    const tripId = parseInt(window.location.pathname.split('/')[2]);
+    
+    const form = document.getElementById('createEntryForm');
+    const contentInput = document.getElementById('content');
+    const entryDateInput = document.getElementById('entryDate');
+    const entryTimeInput = document.getElementById('entryTime');
     const submitBtn = document.getElementById('submitBtn');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
-    
+
     // Media upload variables
     const mediaUploadSection = document.getElementById('mediaUploadSection');
     const mediaInput = document.getElementById('mediaInput');
     const mediaGallery = document.getElementById('mediaGallery');
-    let uploadedMedia = []; // Array to store {file, type (image/video), url (base64)}
-    let selectedCoverIndex = 0; // Index of selected cover image
+    let uploadedPhotos = [];
+
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    entryDateInput.value = today;
 
     // Media upload - click to select
     mediaUploadSection.addEventListener('click', () => {
@@ -568,15 +530,14 @@
 
     async function handleMediaFiles(files) {
         for (const file of files) {
-            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-                continue; // Skip non-media files
+            if (!file.type.startsWith('image/')) {
+                continue;
             }
 
             try {
                 const dataUrl = await fileToDataUrl(file);
-                uploadedMedia.push({
+                uploadedPhotos.push({
                     file: file,
-                    type: file.type.startsWith('image/') ? 'image' : 'video',
                     name: file.name,
                     url: dataUrl
                 });
@@ -598,7 +559,7 @@
     }
 
     function renderMediaGallery() {
-        if (uploadedMedia.length === 0) {
+        if (uploadedPhotos.length === 0) {
             mediaGallery.style.display = 'none';
             return;
         }
@@ -606,65 +567,21 @@
         mediaGallery.style.display = 'grid';
         mediaGallery.innerHTML = '';
 
-        uploadedMedia.forEach((media, index) => {
+        uploadedPhotos.forEach((photo, index) => {
             const mediaItem = document.createElement('div');
             mediaItem.className = 'media-item';
 
-            // Preview (image or video thumbnail)
-            if (media.type === 'image') {
-                const img = document.createElement('img');
-                img.src = media.url;
-                img.className = 'media-item-preview';
-                mediaItem.appendChild(img);
-            } else {
-                const video = document.createElement('video');
-                video.src = media.url;
-                video.className = 'media-item-preview';
-                mediaItem.appendChild(video);
+            const img = document.createElement('img');
+            img.src = photo.url;
+            img.className = 'media-item-preview';
+            mediaItem.appendChild(img);
 
-                // Video indicator
-                const icon = document.createElement('div');
-                icon.style.position = 'absolute';
-                icon.style.top = '0.5rem';
-                icon.style.left = '0.5rem';
-                icon.style.background = 'rgba(0, 0, 0, 0.7)';
-                icon.style.color = 'white';
-                icon.style.padding = '0.25rem 0.5rem';
-                icon.style.borderRadius = '4px';
-                icon.style.fontSize = '0.75rem';
-                icon.textContent = '🎥 VIDEO';
-                mediaItem.appendChild(icon);
-            }
-
-            // Cover badge
-            if (index === selectedCoverIndex) {
-                const badge = document.createElement('div');
-                badge.className = 'media-item-badge';
-                badge.textContent = 'COVER';
-                mediaItem.appendChild(badge);
-            }
-
-            // Overlay with actions
             const overlay = document.createElement('div');
             overlay.className = 'media-item-overlay';
 
             const actions = document.createElement('div');
             actions.className = 'media-item-actions';
 
-            // Set as cover button
-            const coverBtn = document.createElement('button');
-            coverBtn.className = 'media-item-btn cover';
-            coverBtn.innerHTML = '📌';
-            coverBtn.type = 'button';
-            coverBtn.title = 'Set as cover image';
-            coverBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                selectedCoverIndex = index;
-                renderMediaGallery();
-            });
-            actions.appendChild(coverBtn);
-
-            // Delete button
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'media-item-btn';
             deleteBtn.innerHTML = '🗑️';
@@ -674,10 +591,7 @@
             deleteBtn.title = 'Remove';
             deleteBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                uploadedMedia.splice(index, 1);
-                if (selectedCoverIndex >= uploadedMedia.length) {
-                    selectedCoverIndex = uploadedMedia.length - 1;
-                }
+                uploadedPhotos.splice(index, 1);
                 renderMediaGallery();
             });
             actions.appendChild(deleteBtn);
@@ -692,63 +606,51 @@
     // Form submission
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        // Hide previous messages
+
         errorMessage.classList.remove('show');
         successMessage.classList.remove('show');
 
-        // Validate dates
-        const startDate = new Date(startDateInput.value);
-        const endDate = new Date(endDateInput.value);
+        // Validate
+        const content = contentInput.value.trim();
+        const entryDate = entryDateInput.value;
+        const entryTime = entryTimeInput.value || null;
 
-        if (endDate < startDate) {
-            showError('End date must be after start date');
+        if (!content) {
+            showError('Please write something for your reflection');
             return;
         }
 
-        // Determine cover image URL
-        let coverImageUrl = null;
-        if (uploadedMedia.length > 0 && selectedCoverIndex < uploadedMedia.length) {
-            // Use selected media as cover (only if it's an image)
-            const selectedMedia = uploadedMedia[selectedCoverIndex];
-            if (selectedMedia.type === 'image') {
-                coverImageUrl = selectedMedia.url;
-            }
-        }
-
-        // Prepare trip data
-        const tripData = {
-            title: titleInput.value.trim(),
-            location: locationInput.value.trim(),
-            description: descriptionInput.value.trim() || null,
-            start_date: startDateInput.value,
-            end_date: endDateInput.value,
-            cover_image: coverImageUrl,
-            media_files: uploadedMedia.map(m => ({
-                url: m.url,
-                type: m.type,
-                name: m.name
+        // Prepare entry data
+        const entryData = {
+            trip_id: tripId,
+            content: content,
+            entry_date: entryDate,
+            entry_time: entryTime,
+            location: {
+                place_name: document.getElementById('locationName').value || null,
+                latitude: document.getElementById('latitude').value || null,
+                longitude: document.getElementById('longitude').value || null
+            },
+            photos: uploadedPhotos.map((p, idx) => ({
+                url: p.url,
+                caption: null,
+                order: idx
             }))
         };
 
-        // Submit to backend
         submitBtn.disabled = true;
         loadingIndicator.classList.add('show');
 
         try {
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-
-            const response = await fetch('/trips/', {
+            const response = await fetch('/entries/', {
                 method: 'POST',
-                headers: headers,
-                body: JSON.stringify(tripData),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entryData),
                 credentials: 'include'
             });
 
             if (response.status === 401) {
-                showError('Please log in to create a trip');
+                showError('Please log in to create an entry');
                 setTimeout(() => {
                     window.location.href = '/login';
                 }, 2000);
@@ -757,17 +659,13 @@
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.detail || 'Failed to create trip');
+                throw new Error(error.detail || 'Failed to create entry');
             }
 
-            const createdTrip = await response.json();
+            showSuccess('Entry created successfully!');
             
-            // Show success message
-            showSuccess('Trip created successfully! Redirecting...');
-            
-            // Redirect after a short delay
             setTimeout(() => {
-                window.location.href = '/dashboard';
+                window.location.href = `/trip/${tripId}`;
             }, 1500);
 
         } catch (error) {
@@ -778,32 +676,20 @@
         }
     });
 
-    // Helper function to show error
     function showError(message) {
         errorMessage.textContent = message;
         errorMessage.classList.add('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Helper function to show success
     function showSuccess(message) {
         successMessage.textContent = message;
         successMessage.classList.add('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Set minimum end date when start date changes
-    startDateInput.addEventListener('change', function() {
-        endDateInput.min = startDateInput.value;
-        if (endDateInput.value && new Date(endDateInput.value) < new Date(startDateInput.value)) {
-            endDateInput.value = startDateInput.value;
-        }
-    });
-
-    // Initialize with today's date
-    const today = new Date().toISOString().split('T')[0];
-    startDateInput.value = today;
-    endDateInput.value = today;
-    endDateInput.min = today;
+    function goBack() {
+        window.location.href = `/trip/${tripId}`;
+    }
 </script>
 {% endblock %}
