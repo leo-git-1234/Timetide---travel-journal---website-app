@@ -195,6 +195,12 @@ async def trip_view(trip_id: int, request: Request, db: Session = Depends(get_db
     )
 
 
+@app.get("/trip/{trip_id}/edit")
+async def edit_trip_redirect(trip_id: int):
+    """Temporary edit route that forwards to trip view until edit UI exists."""
+    return RedirectResponse(url=f"/trip/{trip_id}")
+
+
 @app.get("/trip/{trip_id}/entry/new")
 async def create_entry_page(trip_id: int, request: Request, db: Session = Depends(get_db)):
     """Render the create entry page."""
@@ -267,8 +273,26 @@ async def day_view(trip_id: int, date: str, request: Request, db: Session = Depe
     )
 
 
+@app.get("/explore")
+async def explore_page(request: Request, db: Session = Depends(get_db)):
+    """Display explore page with interactive map of all trips."""
+    current_user = get_current_user_from_request(request, db)
+    
+    if not current_user:
+        return RedirectResponse(url="/login", status_code=302)
+    
+    return templates.TemplateResponse(
+        "explore.html",
+        {
+            "request": request,
+            "active_page": "explore",
+            "current_user": current_user
+        }
+    )
+
+
 @app.get("/calendar")
-async def calendar_view(request: Request, db: Session = Depends(get_db)):
+async def calendar_view(request: Request, month: str = None, db: Session = Depends(get_db)):
     """Display calendar view with all activity."""
     from datetime import datetime
     from collections import defaultdict
@@ -280,8 +304,14 @@ async def calendar_view(request: Request, db: Session = Depends(get_db)):
     if not current_user:
         return RedirectResponse(url="/login", status_code=302)
     
-    # Get current month/year or from query params
-    current_date = datetime.now()
+    # Get current month/year from query params or default to now
+    if month:
+        try:
+            current_date = datetime.strptime(month + "-01", "%Y-%m-%d")
+        except ValueError:
+            current_date = datetime.now()
+    else:
+        current_date = datetime.now()
     
     # Get all entries for the current user
     entries_list = db.query(Entry).filter(Entry.author_id == current_user.id).all()

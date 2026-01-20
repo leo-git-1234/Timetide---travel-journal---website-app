@@ -8,9 +8,9 @@
         <!-- Center: Navigation Links (only for authenticated users) -->
         {% if current_user %}
         <div class="navbar-center">
-            <a href="/dashboard" class="navbar-link {% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="/dashboard" class="navbar-link {% if active_page == 'dashboard' %}active{% endif %}">My Trips</a>
+            <a href="/explore" class="navbar-link {% if active_page == 'explore' %}active{% endif %}">Explore</a>
             <a href="/calendar" class="navbar-link {% if active_page == 'calendar' %}active{% endif %}">Calendar</a>
-            <a href="/families" class="navbar-link {% if active_page == 'families' %}active{% endif %}">Families</a>
         </div>
         {% else %}
         <div class="navbar-center">
@@ -21,11 +21,11 @@
         <div class="navbar-right">
             {% if current_user %}
             <!-- Logged in: Avatar and Dropdown Menu -->
-            <div class="profile-dropdown">
+            <div class="profile-dropdown" id="profileDropdown" onclick="toggleProfileDropdown(event)">
                 <div class="profile-avatar" title="{{ current_user.name }}">
                     {{ current_user.name[0]|upper }}
                 </div>
-                <div class="dropdown-content">
+                <div class="dropdown-content" id="dropdownContent">
                     <div class="dropdown-header">
                         <div class="dropdown-user-name">{{ current_user.name }}</div>
                         <div class="dropdown-user-email">{{ current_user.email }}</div>
@@ -59,6 +59,45 @@
         // Redirect to login page
         window.location.href = '/login';
     }
+
+    function toggleProfileDropdown(event) {
+        event.stopPropagation();
+        const content = document.getElementById('dropdownContent');
+        const isOpen = content.classList.contains('open');
+        
+        if (isOpen) {
+            content.classList.remove('open');
+        } else {
+            content.classList.add('open');
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('profileDropdown');
+        const content = document.getElementById('dropdownContent');
+        
+        if (dropdown && content) {
+            // If clicking outside the dropdown, close it
+            if (!dropdown.contains(event.target)) {
+                content.classList.remove('open');
+            }
+        }
+    });
+
+    // Prevent dropdown from closing when clicking links inside it
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownContent = document.getElementById('dropdownContent');
+        if (dropdownContent) {
+            dropdownContent.addEventListener('click', function(event) {
+                // Only close on actual links
+                if (event.target.tagName === 'A') {
+                    document.getElementById('dropdownContent').classList.remove('open');
+                }
+                event.stopPropagation();
+            });
+        }
+    });
 </script>
 
 <style>

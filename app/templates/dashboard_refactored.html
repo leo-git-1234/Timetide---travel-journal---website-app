@@ -1,10 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Timetide{% endblock %}
+{% block title %}My Trips - Timetide{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
+    /* Map Banner */
+    .map-banner {
+        position: relative;
+        height: 350px;
+        width: 100%;
+        margin-bottom: 2rem;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    #dashboardMap {
+        width: 100%;
+        height: 100%;
+    }
+
+    .map-banner-overlay {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        background: rgba(255,255,255,0.95);
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 400;
+    }
+
+    .map-banner-title {
+        font-family: var(--font-serif);
+        font-size: 1.5rem;
+        margin: 0 0 0.25rem 0;
+        color: var(--text-primary);
+    }
+
+    .map-banner-subtitle {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
     /* Dashboard Loading & States */
     .dashboard-loading {
         text-align: center;
@@ -283,7 +323,8 @@
     }
 
     .btn-primary,
-    .btn-secondary {
+    .btn-secondary,
+    .btn-danger {
         padding: 0.875rem 1.5rem;
         border-radius: 8px;
         border: none;
@@ -312,6 +353,16 @@
     .btn-secondary:hover {
         background: var(--accent);
         color: white;
+    }
+
+    .btn-danger {
+        background: white;
+        color: #d84444;
+        border: 1.5px solid #d84444;
+    }
+
+    .btn-danger:hover {
+        background: color-mix(in srgb, #d84444 12%, white);
     }
 
     /* All Trips Section */
@@ -400,6 +451,43 @@
         color: var(--text);
         margin: 0;
         line-height: 1.5;
+    }
+
+    /* Trip Card Actions */
+    .trip-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem 0 1.5rem;
+        border-top: 1px solid var(--border);
+        margin-top: 1rem;
+    }
+
+    .trip-card-btn {
+        flex: 1;
+        padding: 0.625rem 1rem;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .trip-card-btn:hover {
+        background: var(--surface);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .trip-card-btn.delete {
+        color: #d84444;
+        border-color: #d84444;
+    }
+
+    .trip-card-btn.delete:hover {
+        background: color-mix(in srgb, #d84444 12%, white);
     }
 
     /* Responsive Design */
@@ -501,10 +589,22 @@
 <!-- Main Dashboard (Authenticated with trips) -->
 <div id="mainDashboard" style="display: none;">
     <div class="dashboard-container">
+        <!-- Map Banner -->
+        <div id="mapBanner" class="map-banner" style="display: none;">
+            <div id="dashboardMap"></div>
+            <div class="map-banner-overlay">
+                <h2 class="map-banner-title">Your Journey Map</h2>
+                <p class="map-banner-subtitle">Click markers to explore your trips</p>
+            </div>
+        </div>
+
         <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <h1 class="dashboard-title">Your Journeys</h1>
-            <p class="dashboard-subtitle">A collection of moments, carefully preserved</p>
+        <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <div>
+                <h1 class="dashboard-title">Your Journeys</h1>
+                <p class="dashboard-subtitle">A collection of moments, carefully preserved</p>
+            </div>
+            <button class="section-action" onclick="window.location.href='/trip/new'">+ New Trip</button>
         </div>
 
         <!-- Primary Trip Focus Area -->
@@ -530,9 +630,11 @@
                     <div class="primary-trip-stats" id="primaryTripStats"></div>
 
                     <!-- Actions -->
-                    <div class="primary-trip-action">
+                    <div class="primary-trip-action" style="flex-wrap: wrap; gap: 0.75rem;">
                         <button class="btn-primary" onclick="viewTripDetail()">View Trip</button>
                         <button class="btn-secondary" onclick="createEntry()">Add Entry</button>
+                        <button class="btn-secondary" onclick="editPrimaryTrip()">Edit Trip</button>
+                        <button class="btn-danger" onclick="deletePrimaryTrip()">Delete Trip</button>
                     </div>
                 </div>
             </div>
@@ -560,6 +662,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // Get auth token from cookie
     function getAuthToken() {
@@ -677,13 +780,22 @@
     function createTripCard(trip) {
         const article = document.createElement('article');
         article.className = 'trip-card';
-        article.onclick = () => window.location.href = `/trip/${trip.id}`;
+        
+        // Create inner wrapper so card click doesn't trigger on button clicks
+        const cardClickable = document.createElement('div');
+        cardClickable.style.cursor = 'pointer';
+        cardClickable.onclick = (e) => {
+            // Don't navigate if clicking buttons
+            if (!e.target.closest('button')) {
+                window.location.href = `/trip/${trip.id}`;
+            }
+        };
 
         const img = document.createElement('img');
         img.alt = `${trip.title} cover`;
         img.className = 'trip-card-image';
         img.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
-        article.appendChild(img);
+        cardClickable.appendChild(img);
 
         const content = document.createElement('div');
         content.className = 'trip-card-content';
@@ -703,7 +815,34 @@
         description.textContent = trip.description || 'A quiet note in time';
         content.appendChild(description);
 
-        article.appendChild(content);
+        cardClickable.appendChild(content);
+        article.appendChild(cardClickable);
+
+        // Add action buttons
+        const actions = document.createElement('div');
+        actions.className = 'trip-card-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'trip-card-btn';
+        editBtn.textContent = '✏️ Edit';
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.location.href = `/trip/${trip.id}/edit`;
+        };
+        actions.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'trip-card-btn delete';
+        deleteBtn.textContent = '🗑️ Delete';
+        deleteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            if (confirm(`Are you sure you want to delete "${trip.title}"? This cannot be undone.`)) {
+                await deleteTrip(trip.id);
+            }
+        };
+        actions.appendChild(deleteBtn);
+
+        article.appendChild(actions);
         return article;
     }
 
@@ -718,6 +857,48 @@
     function createEntry() {
         if (primaryTrip) {
             window.location.href = `/trip/${primaryTrip.id}/entry/new`;
+        }
+    }
+
+    // Edit primary trip
+    function editPrimaryTrip() {
+        if (primaryTrip) {
+            window.location.href = `/trip/${primaryTrip.id}/edit`;
+        }
+    }
+
+    // Delete primary trip
+    function deletePrimaryTrip() {
+        if (!primaryTrip) return;
+        if (confirm(`Delete "${primaryTrip.title}"? This cannot be undone.`)) {
+            deleteTrip(primaryTrip.id);
+        }
+    }
+
+    // Delete trip
+    async function deleteTrip(tripId) {
+        try {
+            const response = await fetch(`/trips/${tripId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (response.ok || response.status === 204) {
+                // Trip deleted successfully, reload dashboard
+                window.location.reload();
+            } else {
+                const error = await response.json().catch(() => ({}));
+                alert(error.detail || 'Failed to delete trip');
+            }
+        } catch (error) {
+            console.error('Error deleting trip:', error);
+            alert('Error deleting trip');
         }
     }
 
@@ -766,6 +947,7 @@
                 // Set primary trip as most recent
                 renderPrimaryTrip(allTrips[0]);
                 renderTripsGrid(allTrips);
+                renderDashboardMap(allTrips);
             }
         } catch (error) {
             console.error('Error loading trips:', error);
@@ -774,6 +956,81 @@
             document.getElementById('errorMessage').textContent = error.message;
             errorState.style.display = 'block';
         }
+    }
+
+    // Render dashboard map banner
+    let dashMap = null;
+    async function renderDashboardMap(trips) {
+        console.log('Initializing dashboard map with', trips.length, 'trips');
+        document.getElementById('mapBanner').style.display = 'block';
+        
+        setTimeout(async () => {
+            try {
+                const mapContainer = document.getElementById('dashboardMap');
+                console.log('Map container:', mapContainer, 'Dimensions:', mapContainer.offsetWidth, 'x', mapContainer.offsetHeight);
+                
+                if (dashMap) {
+                    dashMap.remove();
+                }
+                
+                dashMap = L.map('dashboardMap', {
+                    center: [20, 0],
+                    zoom: 2,
+                    zoomControl: true
+                });
+                
+                console.log('Map instance created:', dashMap);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18,
+                    minZoom: 1
+                }).addTo(dashMap);
+
+                const bounds = [];
+
+                // Load trip details and add markers
+                for (const trip of trips) {
+                    try {
+                        const response = await fetch(`/trips/${trip.id}`, { credentials: 'include' });
+                        if (response.ok) {
+                            const fullTrip = await response.json();
+                            if (fullTrip.entries && fullTrip.entries.length > 0) {
+                                fullTrip.entries.forEach(entry => {
+                                    if (entry.location && entry.location.latitude && entry.location.longitude) {
+                                        const lat = parseFloat(entry.location.latitude);
+                                        const lng = parseFloat(entry.location.longitude);
+                                        
+                                        if (!isNaN(lat) && !isNaN(lng)) {
+                                            const marker = L.marker([lat, lng]).addTo(dashMap);
+                                            marker.bindPopup(`<b>${trip.title}</b><br><a href="/trip/${trip.id}">View Trip</a>`);
+                                            bounds.push([lat, lng]);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error loading trip ${trip.id}:`, error);
+                    }
+                }
+
+                if (bounds.length > 0) {
+                    dashMap.fitBounds(bounds, { padding: [50, 50] });
+                } else {
+                    console.log('No trip coordinates found, using default view');
+                }
+
+                setTimeout(() => {
+                    if (dashMap) {
+                        console.log('Invalidating map size');
+                        dashMap.invalidateSize();
+                    }
+                }, 250);
+            } catch (error) {
+                console.error('Error initializing dashboard map:', error);
+            }
+        }, 200);
     }
 
     // Load on page load

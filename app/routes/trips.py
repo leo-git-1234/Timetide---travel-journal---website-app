@@ -95,7 +95,8 @@ class TripCreate(BaseModel):
     description: Optional[str] = Field(None, max_length=2000)
     start_date: date
     end_date: date
-    cover_image: Optional[str] = Field(None, max_length=2000)  # Can be base64
+    # Allow data URLs / base64 strings for cover images without length cap
+    cover_image: Optional[str] = None  # No length cap; allows data URLs of any size
     media_files: Optional[List[dict]] = Field(None)  # List of {url, type, name}
 
 
@@ -105,7 +106,7 @@ class TripUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=2000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    cover_image: Optional[str] = Field(None, max_length=500)
+    cover_image: Optional[str] = None  # No length cap; allows data URLs of any size
 
 
 class TripOut(BaseModel):
@@ -281,7 +282,26 @@ async def create_trip(trip_data: TripCreate, db: Session = Depends(get_db), curr
     
     db.commit()
     db.refresh(trip)
-    return trip
+    
+    # Return formatted response
+    return {
+        "id": trip.id,
+        "title": trip.title,
+        "location": trip.location,
+        "description": trip.description,
+        "start_date": trip.start_date,
+        "end_date": trip.end_date,
+        "cover_image": trip.cover_image,
+        "owner_id": trip.owner_id,
+        "created_at": trip.created_at.isoformat(),
+        "updated_at": trip.updated_at.isoformat(),
+        "statistics": {
+            "num_days": trip.num_days,
+            "num_entries": trip.num_entries,
+            "num_photos": trip.num_photos,
+            "num_locations": trip.num_locations
+        }
+    }
 
 
 @router.put("/{trip_id}", response_model=TripOut)

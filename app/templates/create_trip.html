@@ -96,6 +96,53 @@
         margin-top: 0.5rem;
     }
 
+    /* Cover image drop area */
+    .cover-dropzone {
+        border: 2px dashed var(--accent);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: linear-gradient(135deg, rgba(122, 166, 147, 0.04), rgba(122, 166, 147, 0.02));
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .cover-dropzone:hover,
+    .cover-dropzone.dragover {
+        border-color: var(--accent);
+        background: linear-gradient(135deg, rgba(122, 166, 147, 0.08), rgba(122, 166, 147, 0.04));
+    }
+
+    .cover-dropzone .cover-icon {
+        font-size: 2.2rem;
+    }
+
+    .cover-dropzone .cover-texts {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        color: var(--text-primary);
+    }
+
+    .cover-dropzone .cover-subtext {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .cover-preview-img {
+        max-width: 220px;
+        max-height: 180px;
+        border-radius: 10px;
+        object-fit: cover;
+        display: none;
+    }
+
+    .cover-dropzone.has-image .cover-placeholder { display: none; }
+    .cover-dropzone.has-image .cover-preview-img { display: block; }
+
     .image-preview-container {
         margin-top: 1rem;
     }
@@ -465,18 +512,18 @@
             <label class="form-label" for="coverImage">
                 Cover Image
             </label>
-            <input
-                type="file"
-                id="coverImage"
-                name="coverImage"
-                class="form-file"
-                accept="image/*"
-            />
-            <p class="form-helper">Choose a memorable photo to represent this trip (optional). Or upload it in the media section below.</p>
-            <div class="image-preview-container" id="imagePreview" style="display: none;">
-                <img id="previewImg" src="" alt="Cover preview" class="image-preview" />
-                <p class="image-preview-label">Image preview</p>
+            <div class="cover-dropzone" id="coverDropzone">
+                <div class="cover-placeholder">
+                    <div class="cover-icon">📷</div>
+                    <div class="cover-texts">
+                        <div class="cover-text">Click or drag a cover photo</div>
+                        <div class="cover-subtext">Large images and data URLs are accepted</div>
+                    </div>
+                </div>
+                <img id="coverPreviewImg" class="cover-preview-img" alt="Cover preview" />
             </div>
+            <input type="file" id="coverInput" accept="image/*" style="display: none;" />
+            <p class="form-helper">Pick a single cover photo here, or select one from the media gallery below.</p>
         </div>
 
         <!-- Media Upload Section -->
@@ -538,6 +585,48 @@
     const mediaGallery = document.getElementById('mediaGallery');
     let uploadedMedia = []; // Array to store {file, type (image/video), url (base64)}
     let selectedCoverIndex = 0; // Index of selected cover image
+    let coverImageData = null; // Direct cover image (outside gallery)
+
+    // Cover image dropzone
+    const coverDropzone = document.getElementById('coverDropzone');
+    const coverInput = document.getElementById('coverInput');
+    const coverPreviewImg = document.getElementById('coverPreviewImg');
+
+    coverDropzone.addEventListener('click', () => coverInput.click());
+
+    coverDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        coverDropzone.classList.add('dragover');
+    });
+
+    coverDropzone.addEventListener('dragleave', () => {
+        coverDropzone.classList.remove('dragover');
+    });
+
+    coverDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        coverDropzone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleCoverFile(file);
+    });
+
+    coverInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleCoverFile(file);
+    });
+
+    async function handleCoverFile(file) {
+        if (!file.type.startsWith('image/')) return;
+        try {
+            const dataUrl = await fileToDataUrl(file);
+            coverImageData = dataUrl;
+            coverPreviewImg.src = dataUrl;
+            coverDropzone.classList.add('has-image');
+        } catch (err) {
+            console.error('Cover image error:', err);
+            showError('Could not read cover image');
+        }
+    }
 
     // Media upload - click to select
     mediaUploadSection.addEventListener('click', () => {
@@ -707,8 +796,8 @@
         }
 
         // Determine cover image URL
-        let coverImageUrl = null;
-        if (uploadedMedia.length > 0 && selectedCoverIndex < uploadedMedia.length) {
+        let coverImageUrl = coverImageData;
+        if (!coverImageUrl && uploadedMedia.length > 0 && selectedCoverIndex < uploadedMedia.length) {
             // Use selected media as cover (only if it's an image)
             const selectedMedia = uploadedMedia[selectedCoverIndex];
             if (selectedMedia.type === 'image') {
@@ -756,8 +845,14 @@
             }
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Failed to create trip');
+                let errorText = 'Failed to create trip';
+                try {
+                    const error = await response.json();
+                    errorText = error.detail || error.message || errorText;
+                } catch (e) {
+                    errorText = `Error ${response.status}: ${response.statusText}`;
+                }
+                throw new Error(errorText);
             }
 
             const createdTrip = await response.json();
@@ -771,7 +866,8 @@
             }, 1500);
 
         } catch (error) {
-            showError(error.message);
+            console.error('Trip creation error:', error);
+            showError(error.message || 'Failed to create trip');
             submitBtn.disabled = false;
         } finally {
             loadingIndicator.classList.remove('show');

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ trip.title }} - Timetide{% endblock %}
+{% block title %}Trip - Timetide{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -164,7 +164,7 @@
     .map-widget {
         background: var(--surface, #FDFBF7);
         border-radius: 16px;
-        overflow: hidden;
+        overflow: visible;
         border: 1px solid var(--border, #E0D8CF);
         margin-bottom: 2rem;
     }
@@ -178,8 +178,73 @@
     }
 
     #trip-map {
-        height: 300px;
+        height: 400px;
         width: 100%;
+        min-height: 400px;
+        position: relative;
+        z-index: 1;
+        background: #f0f0f0;
+    }
+
+    /* Timeline Card */
+    .timeline-card {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--border, #E0D8CF);
+        margin-bottom: 2rem;
+    }
+
+    .timeline-header {
+        font-family: var(--font-serif);
+        font-size: 1.3rem;
+        margin: 0 0 1.5rem 0;
+        color: var(--text-primary);
+    }
+
+    .timeline-items {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border-left: 3px solid var(--accent, #6E8C78);
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .timeline-item:hover {
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .timeline-date {
+        min-width: 80px;
+        font-weight: 600;
+        color: var(--accent, #6E8C78);
+        font-size: 0.9rem;
+    }
+
+    .timeline-content {
+        flex: 1;
+    }
+
+    .timeline-title {
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+        color: var(--text-primary);
+    }
+
+    .timeline-location {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0;
     }
 
     /* Activity Panel */
@@ -507,6 +572,12 @@
                     <div id="trip-map"></div>
                 </div>
 
+                <!-- Timeline Card -->
+                <div class="timeline-card" id="timelineCard" style="display: none;">
+                    <h3 class="timeline-header">Trip Timeline</h3>
+                    <div id="timelineItems" class="timeline-items"></div>
+                </div>
+
                 <!-- Contributors -->
                 <div class="activity-panel" id="activityPanel" style="display: none;">
                     <h3 class="activity-header">Contributors</h3>
@@ -574,6 +645,7 @@
         if (trip.entries && trip.entries.length > 0) {
             renderEntries(trip.entries);
             renderMap(trip.entries);
+            renderTimeline(trip.entries);
         } else {
             document.getElementById('emptyEntries').style.display = 'block';
         }
@@ -637,6 +709,7 @@
     function createEntryCard(entry) {
         const card = document.createElement('div');
         card.className = 'entry-card';
+        card.setAttribute('data-entry-id', entry.id);
 
         // Header
         const header = document.createElement('div');
@@ -734,44 +807,174 @@
         }
     }
 
-    // Render map
+    // Render timeline
+    function renderTimeline(entries) {
+        if (!entries || entries.length === 0) return;
+        
+        document.getElementById('timelineCard').style.display = 'block';
+        const container = document.getElementById('timelineItems');
+        
+        const sortedEntries = [...entries].sort((a, b) => 
+            new Date(a.entry_date) - new Date(b.entry_date)
+        );
+        
+        container.innerHTML = sortedEntries.map(entry => `
+            <div class="timeline-item" onclick="scrollToEntry('${entry.id}')">
+                <div class="timeline-date">${formatDateShort(entry.entry_date)}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">${entry.title || 'Untitled Entry'}</div>
+                    <div class="timeline-location">${entry.location?.place_name || 'No location'}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatDateShort(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function scrollToEntry(entryId) {
+        const element = document.querySelector(`[data-entry-id="${entryId}"]`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // Render timeline
+    function renderTimeline(entries) {
+        if (!entries || entries.length === 0) return;
+        
+        document.getElementById('timelineCard').style.display = 'block';
+        const container = document.getElementById('timelineItems');
+        
+        const sortedEntries = [...entries].sort((a, b) => 
+            new Date(a.entry_date) - new Date(b.entry_date)
+        );
+        
+        container.innerHTML = sortedEntries.map(entry => `
+            <div class="timeline-item" onclick="scrollToEntry('${entry.id}')">
+                <div class="timeline-date">${formatDateShort(entry.entry_date)}</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">${entry.title || 'Untitled Entry'}</div>
+                    <div class="timeline-location">${entry.location?.place_name || 'No location'}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function formatDateShort(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function scrollToEntry(entryId) {
+        const element = document.querySelector(`[data-entry-id="${entryId}"]`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // Render map - SIMPLIFIED VERSION
     function renderMap(entries) {
         const locations = entries.filter(e => e.location && e.location.latitude && e.location.longitude);
         
-        if (locations.length === 0) return;
+        if (locations.length === 0) {
+            console.log('No locations for map');
+            return;
+        }
 
-        document.getElementById('mapWidget').style.display = 'block';
+        console.log('===== STARTING MAP RENDER =====' );
+        console.log('Locations:', locations.length);
         
-        setTimeout(() => {
-            map = L.map('trip-map').setView([
-                parseFloat(locations[0].location.latitude),
-                parseFloat(locations[0].location.longitude)
-            ], 10);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors',
-                maxZoom: 18
-            }).addTo(map);
-
+        // Show the map widget
+        const mapWidget = document.getElementById('mapWidget');
+        mapWidget.style.display = 'block';
+        
+        // Get container
+        const container = document.getElementById('trip-map');
+        console.log('Container before:', container.offsetWidth, 'x', container.offsetHeight);
+        
+        // Remove any existing map
+        if (window.tripMap) {
+            console.log('Removing old map');
+            window.tripMap.remove();
+            window.tripMap = null;
+        }
+        
+        // Clear and reset container
+        container.innerHTML = '';
+        container.style.height = '400px';
+        container.style.width = '100%';
+        container.style.position = 'relative';
+        
+        console.log('Container after reset:', container.offsetWidth, 'x', container.offsetHeight);
+        
+        // Check Leaflet
+        if (typeof L === 'undefined') {
+            console.error('LEAFLET NOT LOADED!');
+            return;
+        }
+        
+        console.log('Creating map...');
+        
+        try {
+            // Create map with first location as center
+            const firstLat = parseFloat(locations[0].location.latitude);
+            const firstLng = parseFloat(locations[0].location.longitude);
+            
+            console.log('First location:', firstLat, firstLng);
+            
+            window.tripMap = L.map(container).setView([firstLat, firstLng], 10);
+            
+            console.log('Map created:', window.tripMap);
+            
+            // Add OpenStreetMap tiles
+            const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            });
+            
+            console.log('Adding tiles...');
+            tiles.addTo(window.tripMap);
+            
+            // Listen for tile events
+            tiles.on('loading', () => console.log('TILES LOADING'));
+            tiles.on('load', () => console.log('TILES LOADED'));
+            tiles.on('tileerror', (err) => console.error('TILE ERROR:', err));
+            
             // Add markers
-            locations.forEach(entry => {
-                const marker = L.marker([
-                    parseFloat(entry.location.latitude),
-                    parseFloat(entry.location.longitude)
-                ]).addTo(map);
+            console.log('Adding', locations.length, 'markers');
+            const bounds = [];
+            
+            locations.forEach((entry, idx) => {
+                const lat = parseFloat(entry.location.latitude);
+                const lng = parseFloat(entry.location.longitude);
+                console.log(`Marker ${idx}:`, lat, lng);
                 
-                marker.bindPopup(`<b>${entry.location.place_name}</b><br>${formatDate(entry.entry_date)}`);
+                const marker = L.marker([lat, lng]).addTo(window.tripMap);
+                marker.bindPopup(`<b>${entry.location.place_name || 'Location'}</b>`);
+                bounds.push([lat, lng]);
             });
 
-            // Fit bounds
-            if (locations.length > 1) {
-                const bounds = locations.map(e => [
-                    parseFloat(e.location.latitude),
-                    parseFloat(e.location.longitude)
-                ]);
-                map.fitBounds(bounds);
+            // Fit bounds if multiple locations
+            if (bounds.length > 1) {
+                console.log('Fitting bounds');
+                window.tripMap.fitBounds(bounds, { padding: [50, 50] });
             }
-        }, 100);
+            
+            // Invalidate size after short delay
+            setTimeout(() => {
+                console.log('Invalidating size');
+                window.tripMap.invalidateSize();
+            }, 100);
+            
+            console.log('===== MAP RENDER COMPLETE =====');
+            
+        } catch (error) {
+            console.error('MAP ERROR:', error);
+            console.error('Stack:', error.stack);
+        }
     }
 
     // Render contributors
@@ -843,8 +1046,7 @@
     }
 
     function addNewEntry() {
-        // TODO: Open entry creation modal
-        alert('Entry creation interface coming soon!');
+        window.location.href = `/trip/${tripId}/entry/new`;
     }
 
     // Initialize
