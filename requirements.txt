@@ -11,8 +11,8 @@ psycopg2-binary==2.9.9  # PostgreSQL adapter
 alembic==1.12.1  # Database migrations
 
 # Authentication & Security
-python-jose[cryptography]==3.3.0  # JWT tokens
-passlib[bcrypt]>=1.7.4  # Password hashing
+PyJWT==2.8.1  # JWT tokens (pure Python, no Rust)
+passlib[argon2]>=1.7.4  # Password hashing with argon2 (pure Python)
 python-multipart==0.0.6  # Form data parsing
 
 # Templates
