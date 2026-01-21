@@ -4,7 +4,7 @@
 # FastAPI framework
 fastapi==0.104.1
 # Use a modern uvicorn compatible with Python 3.13 and avoid missing install issues
-uvicorn[standard]==0.30.6
+uvicorn[standard]>=0.29.0
 
 # Database
 sqlalchemy==2.0.23
