@@ -3,7 +3,8 @@
 
 # FastAPI framework
 fastapi==0.104.1
-uvicorn[standard]==0.24.0
+# Use a modern uvicorn compatible with Python 3.13 and avoid missing install issues
+uvicorn[standard]==0.30.6
 
 # Database
 sqlalchemy==2.0.23
@@ -18,9 +19,9 @@ python-multipart==0.0.6  # Form data parsing
 # Templates
 jinja2==3.1.2
 
-# Validation
-pydantic==2.5.0
-pydantic[email]==2.5.0
+# Validation (pin to version with prebuilt wheels for Python 3.13)
+pydantic==2.8.2
+pydantic[email]==2.8.2
 
 # Environment variables
 python-dotenv==1.0.0
