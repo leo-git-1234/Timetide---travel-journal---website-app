@@ -19,7 +19,7 @@ python-multipart==0.0.6  # Form data parsing
 # Templates
 jinja2==3.1.2
 
-# Validation (pin to version with prebuilt wheels for Python 3.13)
+# Validation (pin to version with prebuilt wheels for Python 3.12)
 pydantic==2.8.2
 pydantic[email]==2.8.2
 
