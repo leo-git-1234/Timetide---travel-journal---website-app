@@ -114,8 +114,10 @@
         }
         const token = dataLogin && dataLogin.access_token;
         if (!token) { showError('Missing token from server.'); return; }
-        // Store token as a cookie so it's sent automatically on subsequent requests
+        // Store token in both cookie and localStorage
         document.cookie = `timetide_token=${token}; path=/; SameSite=Strict`;
+        localStorage.setItem('token', token);
+        console.log('Token stored in cookie and localStorage after signup');
         window.location.assign('/dashboard');
       } catch (err) {
         console.error('Signup error:', err);

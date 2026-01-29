@@ -103,6 +103,7 @@ class TripCreate(BaseModel):
 class TripUpdate(BaseModel):
     """Schema for updating a trip."""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
+    location: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=2000)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -323,6 +324,8 @@ async def update_trip(trip_id: int, trip_data: TripUpdate, db: Session = Depends
     # Update only provided fields
     if trip_data.title is not None:
         trip.title = trip_data.title
+    if trip_data.location is not None:
+        trip.location = trip_data.location
     if trip_data.description is not None:
         trip.description = trip_data.description
     if trip_data.start_date is not None:

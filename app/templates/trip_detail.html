@@ -46,6 +46,285 @@
         line-height: 1.1;
     }
 
+    .edit-trip-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+        height: fit-content;
+    }
+
+    .edit-trip-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.6);
+        transform: scale(1.05);
+    }
+
+    /* Edit Trip Modal */
+    .edit-trip-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .edit-trip-modal {
+        background: var(--surface, #FDFBF7);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 600px;
+        width: 90%;
+        margin: 2rem auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .edit-trip-modal-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border, #E0D8CF);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .edit-trip-modal-header h2 {
+        margin: 0;
+        font-family: var(--font-serif, serif);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .close-modal-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 0;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .close-modal-btn:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--text-primary);
+    }
+
+    .edit-trip-modal-body {
+        padding: 2rem;
+        overflow-y: auto;
+        max-height: calc(80vh - 200px);
+    }
+
+    .edit-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .edit-form-group input[type="text"],
+    .edit-form-group input[type="date"],
+    .edit-form-group input[type="file"],
+    .edit-form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border, #E0D8CF);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        background: var(--bg-primary, #FFFFFF);
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .edit-form-group input[type="text"]:focus,
+    .edit-form-group input[type="date"]:focus,
+    .edit-form-group input[type="file"]:focus,
+    .edit-form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent, #6E8C78);
+        box-shadow: 0 0 0 3px rgba(110, 140, 120, 0.1);
+    }
+
+    .edit-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    /* Entry edit item styles */
+    .entry-edit-item {
+        background: var(--bg-primary, #F7F4EF);
+        border: 1px solid var(--border, #E0D8CF);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .entry-edit-item:hover {
+        background: var(--surface, #FDFBF7);
+        border-color: var(--accent, #6E8C78);
+    }
+
+    .entry-edit-item.expanded {
+        background: var(--surface, #FDFBF7);
+        border-color: var(--accent, #6E8C78);
+    }
+
+    .entry-edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .entry-edit-date {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .entry-edit-time {
+        color: var(--text-secondary, #6A655D);
+        font-size: 0.85rem;
+    }
+
+    .entry-edit-content-preview {
+        color: var(--text-secondary, #6A655D);
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .entry-edit-form {
+        display: none;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border, #E0D8CF);
+    }
+
+    .entry-edit-form.visible {
+        display: block;
+    }
+
+    .entry-edit-form textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border, #E0D8CF);
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+        box-sizing: border-box;
+    }
+
+    .entry-edit-form textarea:focus {
+        outline: none;
+        border-color: var(--accent, #6E8C78);
+    }
+
+    .entry-edit-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .entry-edit-actions button {
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .entry-delete-btn {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .entry-delete-btn:hover {
+        background: #ff5252;
+    }
+
+    .entry-save-btn {
+        background: var(--accent, #6E8C78);
+        color: white;
+    }
+
+    .entry-save-btn:hover {
+        background: #5a7665;
+    }
+
+    .edit-trip-modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid var(--border, #E0D8CF);
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+
+    .btn-cancel,
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: var(--bg-primary, #F7F4EF);
+        color: var(--text-primary);
+        border: 1px solid var(--border, #E0D8CF);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border, #E0D8CF);
+    }
+
+    .btn-primary {
+        background: var(--accent, #6E8C78);
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #5a7665;
+    }
+
+    .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .trip-meta {
         font-size: 1.1rem;
         opacity: 0.95;
@@ -482,7 +761,55 @@
         .stat-grid {
             grid-template-columns: 1fr 1fr;
         }
+
+        .edit-trip-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .edit-trip-modal {
+            width: 95%;
+            margin: 1rem auto;
+        }
+
+        .edit-form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .edit-trip-modal-body {
+            max-height: calc(100vh - 200px);
+            padding: 1.5rem;
+        }
+
+        .edit-trip-modal-header {
+            padding: 1.5rem;
+        }
+
+        .edit-trip-modal-footer {
+            padding: 1rem 1.5rem;
+            gap: 0.75rem;
+        }
+
+        .btn-cancel,
+        .btn-primary {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .entry-edit-item {
+            padding: 0.75rem;
+        }
+
+        .entry-edit-actions {
+            flex-direction: column;
+        }
+
+        .entry-edit-actions button {
+            width: 100%;
+        }
     }
+
 </style>
 {% endblock %}
 
@@ -507,16 +834,21 @@
         <div class="trip-hero">
             <img id="tripCover" src="" alt="Trip cover" class="trip-hero-image">
             <div class="trip-hero-overlay">
-                <h1 id="tripTitle" class="trip-title"></h1>
-                <div class="trip-meta">
-                    <div class="trip-meta-item">
-                        <span>📍</span>
-                        <span id="tripLocation"></span>
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <h1 id="tripTitle" class="trip-title"></h1>
+                        <div class="trip-meta">
+                            <div class="trip-meta-item">
+                                <span>📍</span>
+                                <span id="tripLocation"></span>
+                            </div>
+                            <div class="trip-meta-item">
+                                <span>📅</span>
+                                <span id="tripDates"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="trip-meta-item">
-                        <span>📅</span>
-                        <span id="tripDates"></span>
-                    </div>
+                    <button id="editTripBtn" class="edit-trip-btn" onclick="openEditTripModal()">✏️ Edit</button>
                 </div>
             </div>
         </div>
@@ -588,6 +920,68 @@
     </div>
 </div>
 
+<!-- Edit Trip Modal -->
+<div id="editTripModal" class="edit-trip-modal-overlay">
+    <div class="edit-trip-modal">
+        <div class="edit-trip-modal-header">
+            <h2>Edit Trip</h2>
+            <button class="close-modal-btn" onclick="closeEditTripModal()">&times;</button>
+        </div>
+        
+        <div class="edit-trip-modal-body">
+            <!-- Trip Title -->
+            <div class="edit-form-group">
+                <label for="editTripTitle">Trip Title *</label>
+                <input type="text" id="editTripTitle" placeholder="Enter trip title" maxlength="255">
+            </div>
+
+            <!-- Location -->
+            <div class="edit-form-group">
+                <label for="editTripLocation">Location *</label>
+                <input type="text" id="editTripLocation" placeholder="Enter location" maxlength="255">
+            </div>
+
+            <!-- Description -->
+            <div class="edit-form-group">
+                <label for="editTripDescription">Description</label>
+                <textarea id="editTripDescription" placeholder="Enter trip description" maxlength="2000" rows="4"></textarea>
+            </div>
+
+            <!-- Dates -->
+            <div class="edit-form-row">
+                <div class="edit-form-group">
+                    <label for="editTripStartDate">Start Date *</label>
+                    <input type="date" id="editTripStartDate" required>
+                </div>
+                <div class="edit-form-group">
+                    <label for="editTripEndDate">End Date *</label>
+                    <input type="date" id="editTripEndDate" required>
+                </div>
+            </div>
+
+            <!-- Cover Image -->
+            <div class="edit-form-group">
+                <label for="editCoverImageInput">Trip Cover Image</label>
+                <input type="file" id="editCoverImageInput" accept="image/*" onchange="previewCoverImage(event)">
+                <img id="coverImagePreview" src="" alt="Cover preview" style="max-width: 100%; max-height: 200px; margin-top: 1rem; border-radius: 8px; display: none;">
+            </div>
+
+            <!-- Entries Section -->
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border, #E0D8CF);">
+                <h3 style="font-size: 1.1rem; margin: 0 0 1rem 0; color: var(--text-primary);">Entries</h3>
+                <div id="entriesEditList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Entries will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-trip-modal-footer">
+            <button class="btn-cancel" onclick="closeEditTripModal()">Cancel</button>
+            <button id="saveEditBtn" class="btn-primary" onclick="saveTrip()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
 <!-- Floating Add Button -->
 <button class="add-entry-btn" onclick="addNewEntry()" title="Add new entry">+</button>
 {% endblock %}
@@ -611,6 +1005,7 @@
             }
 
             tripData = await response.json();
+            window.tripData = tripData; // Store globally for modal access
             renderTrip(tripData);
         } catch (error) {
             console.error('Error loading trip:', error);
@@ -1047,6 +1442,243 @@
 
     function addNewEntry() {
         window.location.href = `/trip/${tripId}/entry/new`;
+    }
+
+    // Edit Trip Modal Functions
+    function openEditTripModal() {
+        const modal = document.getElementById('editTripModal');
+        const trip = window.tripData; // Global trip data from loadTrip()
+        
+        // Populate form with current trip data
+        document.getElementById('editTripTitle').value = trip.title || '';
+        document.getElementById('editTripLocation').value = trip.location || '';
+        document.getElementById('editTripDescription').value = trip.description || '';
+        document.getElementById('editTripStartDate').value = trip.start_date || '';
+        document.getElementById('editTripEndDate').value = trip.end_date || '';
+        
+        // Show preview of current cover image
+        const preview = document.getElementById('coverImagePreview');
+        if (trip.cover_image) {
+            preview.src = trip.cover_image;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+        
+        // Populate entries list
+        populateEntriesEditList(trip.entries || []);
+        
+        modal.style.display = 'block';
+    }
+
+    function populateEntriesEditList(entries) {
+        const container = document.getElementById('entriesEditList');
+        container.innerHTML = '';
+        
+        if (!entries || entries.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No entries in this trip yet.</p>';
+            return;
+        }
+        
+        entries.forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry-edit-item';
+            entryDiv.innerHTML = `
+                <div class="entry-edit-header" onclick="toggleEntryEditForm(this)">
+                    <div style="flex: 1;">
+                        <div class="entry-edit-date">${formatDate(entry.entry_date)}</div>
+                        <div class="entry-edit-time">${entry.entry_time || 'No time'}</div>
+                    </div>
+                    <span style="font-size: 1.2rem; color: var(--text-secondary);">▼</span>
+                </div>
+                <div class="entry-edit-content-preview">${entry.content.substring(0, 100)}${entry.content.length > 100 ? '...' : ''}</div>
+                <div class="entry-edit-form">
+                    <textarea id="entryContent_${entry.id}" rows="4" placeholder="Entry content">${entry.content}</textarea>
+                    <div class="entry-edit-actions">
+                        <button class="entry-save-btn" onclick="saveEntry(${entry.id})">Save</button>
+                        <button class="entry-delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(entryDiv);
+        });
+    }
+
+    function toggleEntryEditForm(headerElement) {
+        const item = headerElement.parentElement;
+        item.classList.toggle('expanded');
+        const form = item.querySelector('.entry-edit-form');
+        form.classList.toggle('visible');
+    }
+
+    async function saveEntry(entryId) {
+        try {
+            const content = document.getElementById(`entryContent_${entryId}`).value.trim();
+            
+            if (!content) {
+                alert('Entry content cannot be empty');
+                return;
+            }
+            
+            const response = await fetch(`/api/entries/${entryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to update entry');
+            }
+            
+            alert('Entry updated successfully!');
+            // Reload trip to reflect changes
+            await loadTrip();
+            openEditTripModal();
+        } catch (error) {
+            console.error('Error updating entry:', error);
+            alert('Failed to update entry: ' + error.message);
+        }
+    }
+
+    async function deleteEntry(entryId) {
+        if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/entries/${entryId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to delete entry');
+            }
+            
+            alert('Entry deleted successfully!');
+            // Reload trip to reflect changes
+            await loadTrip();
+            openEditTripModal();
+        } catch (error) {
+            console.error('Error deleting entry:', error);
+            alert('Failed to delete entry: ' + error.message);
+        }
+    }
+
+    function closeEditTripModal() {
+        document.getElementById('editTripModal').style.display = 'none';
+    }
+
+    async function saveTrip() {
+        const saveBtn = document.getElementById('saveEditBtn');
+        const title = document.getElementById('editTripTitle').value.trim();
+        const location = document.getElementById('editTripLocation').value.trim();
+        const description = document.getElementById('editTripDescription').value.trim();
+        const startDate = document.getElementById('editTripStartDate').value;
+        const endDate = document.getElementById('editTripEndDate').value;
+        let coverImage = null;
+
+        // Validate required fields
+        if (!title) {
+            alert('Please enter a trip title');
+            return;
+        }
+        if (!location) {
+            alert('Please enter a location');
+            return;
+        }
+        if (!startDate || !endDate) {
+            alert('Please select start and end dates');
+            return;
+        }
+        if (new Date(endDate) < new Date(startDate)) {
+            alert('End date must be after start date');
+            return;
+        }
+
+        // Handle cover image if changed
+        const fileInput = document.getElementById('editCoverImageInput');
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            coverImage = await fileToBase64(file);
+        }
+
+        // Prepare update data
+        const updateData = {
+            title,
+            location,
+            description: description || null,
+            start_date: startDate,
+            end_date: endDate
+        };
+        
+        if (coverImage) {
+            updateData.cover_image = coverImage;
+        }
+
+        // Send update request
+        try {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            const response = await fetch(`/api/trips/${tripId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to update trip');
+            }
+
+            // Reload trip data and close modal
+            await loadTrip();
+            closeEditTripModal();
+            alert('Trip updated successfully!');
+        } catch (error) {
+            console.error('Error updating trip:', error);
+            alert('Failed to update trip: ' + error.message);
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+        }
+    }
+
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function previewCoverImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('coverImagePreview');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('editTripModal');
+        if (event.target === modal) {
+            closeEditTripModal();
+        }
     }
 
     // Initialize

@@ -52,6 +52,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     bio = Column(Text, nullable=True)
     avatar_url = Column(String(500), nullable=True)
+    is_profile_public = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

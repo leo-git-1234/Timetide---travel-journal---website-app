@@ -121,6 +121,204 @@
         margin-bottom: 1.5rem;
     }
 
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: var(--surface);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        font-family: var(--font-serif);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .modal-body {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .form-input,
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 1rem;
+        font-family: inherit;
+        background: var(--background);
+        color: var(--text-primary);
+        transition: border-color 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .btn-cancel {
+        background: var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .btn-cancel:hover {
+        opacity: 0.8;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .alert.show {
+        display: block;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .toggle-switch {
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .2s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .2s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
     @media (max-width: 768px) {
         .settings-row {
             flex-direction: column;
@@ -155,38 +353,38 @@
         <div class="settings-row">
             <div class="settings-label">
                 <span class="settings-label-title">Email Address</span>
-                <span class="settings-label-desc">
+                <span class="settings-label-desc" id="currentEmail">
                     {% if current_user %}
                         {{ current_user.email }}
                     {% endif %}
                 </span>
             </div>
             <div class="settings-action">
-                <button class="btn-small btn-small-secondary" disabled>Change Email</button>
+                <button class="btn-small btn-small-secondary" onclick="openChangeEmailModal()">Change Email</button>
             </div>
         </div>
 
         <div class="settings-row">
             <div class="settings-label">
                 <span class="settings-label-title">Password</span>
-                <span class="settings-label-desc">Last changed recently</span>
+                <span class="settings-label-desc">Keep it secure and unique</span>
             </div>
             <div class="settings-action">
-                <button class="btn-small btn-small-secondary" disabled>Change Password</button>
+                <button class="btn-small btn-small-secondary" onclick="openChangePasswordModal()">Change Password</button>
             </div>
         </div>
 
         <div class="settings-row">
             <div class="settings-label">
                 <span class="settings-label-title">Username</span>
-                <span class="settings-label-desc">
+                <span class="settings-label-desc" id="currentUsername">
                     {% if current_user %}
                         @{{ current_user.username }}
                     {% endif %}
                 </span>
             </div>
             <div class="settings-action">
-                <button class="btn-small btn-small-secondary" disabled>Change Username</button>
+                <button class="btn-small btn-small-secondary" onclick="openChangeUsernameModal()">Change Username</button>
             </div>
         </div>
     </div>
@@ -194,28 +392,14 @@
     <!-- Privacy & Sharing Section -->
     <div class="settings-section">
         <h2 class="settings-section-title">Privacy & Sharing</h2>
-        
-        <div class="settings-info">
-            Privacy settings are coming soon. Your trips are currently private and only visible to you.
-        </div>
-
-        <div class="settings-row">
-            <div class="settings-label">
-                <span class="settings-label-title">Profile Visibility</span>
-                <span class="settings-label-desc">Control who can see your profile</span>
-            </div>
-            <div class="settings-action">
-                <button class="btn-small btn-small-secondary" disabled>Configure</button>
-            </div>
-        </div>
 
         <div class="settings-row">
             <div class="settings-label">
                 <span class="settings-label-title">Trip Sharing</span>
-                <span class="settings-label-desc">Manage shared trips with family</span>
+                <span class="settings-label-desc">Share specific trips with family or friends</span>
             </div>
             <div class="settings-action">
-                <button class="btn-small btn-small-secondary" disabled>Manage</button>
+                <button class="btn-small btn-small-secondary" onclick="openTripSharingModal()">Manage</button>
             </div>
         </div>
     </div>
@@ -230,9 +414,396 @@
                 <span class="settings-label-desc">Permanently delete your account and all data</span>
             </div>
             <div class="settings-action">
-                <button class="btn-small btn-small-danger" disabled>Delete Account</button>
+                <button class="btn-small btn-small-danger" onclick="openDeleteAccountModal()">Delete Account</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Change Email Modal -->
+<div id="changeEmailModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Change Email Address</div>
+        <div id="changeEmailAlert" class="alert"></div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">New Email Address</label>
+                <input type="email" id="newEmail" class="form-input" placeholder="your.new.email@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" id="emailPassword" class="form-input" placeholder="Enter your password">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeChangeEmailModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveChangeEmail()">Change Email</button>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Change Password</div>
+        <div id="changePasswordAlert" class="alert"></div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" id="currentPassword" class="form-input" placeholder="Enter your current password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" id="newPassword" class="form-input" placeholder="Enter a new password (min 8 chars)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword" class="form-input" placeholder="Confirm your new password">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeChangePasswordModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveChangePassword()">Change Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- Change Username Modal -->
+<div id="changeUsernameModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Change Username</div>
+        <div id="changeUsernameAlert" class="alert"></div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">New Username</label>
+                <input type="text" id="newUsername" class="form-input" placeholder="new_username (min 3 chars)">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password (for verification)</label>
+                <input type="password" id="usernamePassword" class="form-input" placeholder="Enter your password">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeChangeUsernameModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveChangeUsername()">Change Username</button>
+        </div>
+    </div>
+</div>
+
+<!-- Trip Sharing Modal -->
+<div id="tripSharingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Trip Sharing</div>
+        <div id="tripSharingAlert" class="alert"></div>
+        <div class="modal-body">
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Trip sharing features are coming soon. You'll be able to share specific trips with family members and friends.</p>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">For now, all your trips are private and only visible to you.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeTripSharingModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteAccountModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" style="color: #c94848;">Delete Account</div>
+        <div id="deleteAccountAlert" class="alert"></div>
+        <div class="modal-body">
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; color: #856404;">
+                <strong>⚠️ Warning:</strong> This action cannot be undone. All your trips, entries, and account data will be permanently deleted.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password (for confirmation)</label>
+                <input type="password" id="deleteAccountPassword" class="form-input" placeholder="Enter your password to confirm deletion">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeDeleteAccountModal()">Cancel</button>
+            <button class="btn-primary" style="background: #c94848;" onclick="confirmDeleteAccount()">Delete My Account</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get token from cookie or localStorage
+function getToken() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        const cookieToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('timetide_token='));
+        return cookieToken ? cookieToken.split('=')[1] : null;
+    }
+    return token;
+}
+
+const token = getToken();
+
+// Load current user data
+async function loadUserData() {
+    try {
+        if (!token) {
+            console.log('No token available');
+            return;
+        }
+
+        const response = await fetch('/users/me', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API Error: ${response.status} - ${errorData.detail || 'Failed to load user data'}`);
+        }
+        
+        const user = await response.json();
+        
+        document.getElementById('currentEmail').textContent = user.email;
+        document.getElementById('currentUsername').textContent = `@${user.username}`;
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+}
+
+function showAlert(elementId, message, type) {
+    const alert = document.getElementById(elementId);
+    alert.textContent = message;
+    alert.className = `alert show alert-${type}`;
+}
+
+// Change Email Modal
+function openChangeEmailModal() {
+    document.getElementById('changeEmailModal').classList.add('show');
+}
+
+function closeChangeEmailModal() {
+    document.getElementById('changeEmailModal').classList.remove('show');
+    document.getElementById('changeEmailAlert').classList.remove('show');
+}
+
+async function saveChangeEmail() {
+    const newEmail = document.getElementById('newEmail').value.trim();
+    const password = document.getElementById('emailPassword').value;
+    
+    if (!newEmail || !password) {
+        showAlert('changeEmailAlert', 'Please fill in all fields', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/users/me/change-email', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ new_email: newEmail, password })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to change email');
+        }
+        
+        showAlert('changeEmailAlert', 'Email changed successfully!', 'success');
+        setTimeout(() => {
+            closeChangeEmailModal();
+            loadUserData();
+            document.getElementById('newEmail').value = '';
+            document.getElementById('emailPassword').value = '';
+        }, 1000);
+    } catch (error) {
+        showAlert('changeEmailAlert', error.message, 'error');
+    }
+}
+
+// Change Password Modal
+function openChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('show');
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.remove('show');
+    document.getElementById('changePasswordAlert').classList.remove('show');
+}
+
+async function saveChangePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        showAlert('changePasswordAlert', 'Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        showAlert('changePasswordAlert', 'New passwords do not match', 'error');
+        return;
+    }
+    
+    if (newPassword.length < 8) {
+        showAlert('changePasswordAlert', 'New password must be at least 8 characters', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/users/me/change-password', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to change password');
+        }
+        
+        showAlert('changePasswordAlert', 'Password changed successfully!', 'success');
+        setTimeout(() => {
+            closeChangePasswordModal();
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }, 1000);
+    } catch (error) {
+        showAlert('changePasswordAlert', error.message, 'error');
+    }
+}
+
+// Change Username Modal
+function openChangeUsernameModal() {
+    document.getElementById('changeUsernameModal').classList.add('show');
+}
+
+function closeChangeUsernameModal() {
+    document.getElementById('changeUsernameModal').classList.remove('show');
+    document.getElementById('changeUsernameAlert').classList.remove('show');
+}
+
+async function saveChangeUsername() {
+    const newUsername = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('usernamePassword').value;
+    
+    if (!newUsername || !password) {
+        showAlert('changeUsernameAlert', 'Please fill in all fields', 'error');
+        return;
+    }
+    
+    if (newUsername.length < 3) {
+        showAlert('changeUsernameAlert', 'Username must be at least 3 characters', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/users/me/change-username', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ new_username: newUsername, password })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to change username');
+        }
+        
+        showAlert('changeUsernameAlert', 'Username changed successfully!', 'success');
+        setTimeout(() => {
+            closeChangeUsernameModal();
+            loadUserData();
+            document.getElementById('newUsername').value = '';
+            document.getElementById('usernamePassword').value = '';
+        }, 1000);
+    } catch (error) {
+        showAlert('changeUsernameAlert', error.message, 'error');
+    }
+}
+
+// Trip Sharing Modal
+function openTripSharingModal() {
+    document.getElementById('tripSharingModal').classList.add('show');
+}
+
+function closeTripSharingModal() {
+    document.getElementById('tripSharingModal').classList.remove('show');
+}
+
+// Delete Account Modal
+function openDeleteAccountModal() {
+    document.getElementById('deleteAccountModal').classList.add('show');
+}
+
+function closeDeleteAccountModal() {
+    document.getElementById('deleteAccountModal').classList.remove('show');
+    document.getElementById('deleteAccountAlert').classList.remove('show');
+}
+
+async function confirmDeleteAccount() {
+    const password = document.getElementById('deleteAccountPassword').value;
+    
+    if (!password) {
+        showAlert('deleteAccountAlert', 'Please enter your password to confirm', 'error');
+        return;
+    }
+    
+    const confirmed = confirm('Are you absolutely sure? This action cannot be undone. All your data will be permanently deleted.');
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch('/users/me?password=' + encodeURIComponent(password), {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to delete account');
+        }
+        
+        showAlert('deleteAccountAlert', 'Account deleted successfully. Redirecting...', 'success');
+        setTimeout(() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }, 2000);
+    } catch (error) {
+        showAlert('deleteAccountAlert', error.message, 'error');
+    }
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const modals = [
+        'changeEmailModal', 'changePasswordModal', 'changeUsernameModal',
+        'tripSharingModal', 'deleteAccountModal'
+    ];
+    
+    modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (event.target == modal) {
+            modal.classList.remove('show');
+        }
+    });
+}
+
+// Load user data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Settings page loaded, token available:', !!token);
+    
+    if (token) {
+        loadUserData();
+    } else {
+        console.warn('No authentication token found. User may not be logged in.');
+    }
+});
+</script>
 {% endblock %}

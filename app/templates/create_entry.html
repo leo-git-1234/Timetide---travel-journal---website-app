@@ -541,12 +541,119 @@
                     name: file.name,
                     url: dataUrl
                 });
+                
+                // Extract metadata from the first photo if not already set
+                if (uploadedPhotos.length === 1) {
+                    await extractAndSetMetadata(dataUrl);
+                }
             } catch (error) {
                 console.error('Error processing file:', error);
             }
         }
 
         renderMediaGallery();
+    }
+
+    async function extractAndSetMetadata(imageUrl) {
+        try {
+            const latInput = document.getElementById('latitude');
+            const lonInput = document.getElementById('longitude');
+            const dateInput = document.getElementById('entryDate');
+            const timeInput = document.getElementById('entryTime');
+            const locationInput = document.getElementById('location');
+            
+            const response = await fetch('/entries/extract-metadata', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_url: imageUrl }),
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const metadata = await response.json();
+                
+                // Extract GPS coordinates if not already set
+                if (!latInput.value && !lonInput.value) {
+                    if (metadata.latitude && metadata.longitude) {
+                        latInput.value = metadata.latitude;
+                        lonInput.value = metadata.longitude;
+                        console.log('GPS coordinates extracted from photo:', { lat: metadata.latitude, lon: metadata.longitude });
+                    }
+                }
+                
+                // Extract date if not already set - validate format YYYY-MM-DD
+                if (!dateInput.value && metadata.date) {
+                    let dateValue = metadata.date.trim();
+                    // Ensure it's in YYYY-MM-DD format
+                    if (dateValue && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+                        dateInput.value = dateValue;
+                        console.log('Date extracted from photo:', dateValue);
+                    } else {
+                        console.warn('Invalid date format from EXIF:', dateValue);
+                    }
+                }
+                
+                // Extract time if not already set - validate format HH:MM:SS or HH:MM
+                if (!timeInput.value && metadata.time) {
+                    let timeValue = metadata.time.trim();
+                    // Ensure it's in HH:MM:SS or HH:MM format (time input accepts both)
+                    if (timeValue && /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/.test(timeValue)) {
+                        // Convert to HH:MM format for HTML time input (it doesn't accept seconds)
+                        const timeParts = timeValue.split(':');
+                        const formattedTime = `${timeParts[0]}:${timeParts[1]}`;
+                        timeInput.value = formattedTime;
+                        console.log('Time extracted from photo:', formattedTime);
+                    } else {
+                        console.warn('Invalid time format from EXIF:', timeValue);
+                    }
+                }
+                
+                // Extract place name/location if not already set and if we have GPS
+                if (!locationInput.value && metadata.place_name) {
+                    locationInput.value = metadata.place_name;
+                    console.log('Place name extracted from photo:', metadata.place_name);
+                } else if (!locationInput.value && metadata.latitude && metadata.longitude) {
+                    // If no place name but have GPS, show coordinates as fallback
+                    locationInput.value = `${metadata.latitude}, ${metadata.longitude}`;
+                    locationInput.placeholder = 'Click to edit location from GPS coordinates';
+                    console.log('Location set to GPS coordinates:', locationInput.value);
+                }
+            }
+        } catch (error) {
+            console.error('Error extracting metadata from photo:', error);
+            // Silently continue - not critical if extraction fails
+        }
+    }
+
+    async function extractAndSetGPS(imageUrl) {
+        try {
+            const latInput = document.getElementById('latitude');
+            const lonInput = document.getElementById('longitude');
+            
+            // Only extract if fields are empty
+            if (latInput.value || lonInput.value) {
+                return;
+            }
+            
+            const response = await fetch('/entries/extract-gps', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_url: imageUrl }),
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const gpsData = await response.json();
+                if (gpsData.latitude && gpsData.longitude) {
+                    latInput.value = gpsData.latitude;
+                    lonInput.value = gpsData.longitude;
+                    console.log('GPS coordinates extracted from photo:', gpsData);
+                }
+            }
+        } catch (error) {
+            console.error('Error extracting GPS:', error);
+            // Silently fail - GPS extraction is optional
+        }
     }
 
     function fileToDataUrl(file) {

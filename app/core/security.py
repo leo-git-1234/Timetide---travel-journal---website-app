@@ -3,6 +3,7 @@ from typing import Optional
 import hashlib
 
 from jose import jwt
+from jose import exceptions as jose_exceptions
 from passlib.context import CryptContext
 
 from .config import SECRET_KEY, ALGORITHM
@@ -38,5 +39,12 @@ def create_access_token(subject: str, expires_delta: Optional[timedelta] = None)
     return encoded_jwt
 
 
-def decode_token(token: str) -> dict:
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+def decode_token(token: str) -> Optional[dict]:
+    """Decode and verify a JWT token. Returns None if invalid."""
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except (jose_exceptions.JWTError, jose_exceptions.ExpiredSignatureError):
+        return None
+    except Exception:
+        return None
