@@ -185,7 +185,7 @@ a:hover {
 }
 
 .navbar-logo-image {
-    height: 1.8rem;
+    height: clamp(40px, 5vw, 52px);
     width: auto;
     display: block;
 }
@@ -1321,7 +1321,7 @@ a:hover {
     }
 
     .navbar-logo-image {
-        height: 1.6rem;
+        height: 36px;
     }
     
     .navbar-center {
