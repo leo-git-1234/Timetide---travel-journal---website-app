@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80">
+  <!-- Wordmark "Timetide" - refined serif italic -->
+  <text x="45" y="45" font-family="Georgia, serif" font-size="52px" font-weight="700" font-style="italic" fill="#1a3a52">Timetide</text>
+  
+  <!-- Upper tidal wave - thin and subtle -->
+  <path 
+    d="M 45 55 Q 95 48 150 52 Q 200 56 270 48" 
+    stroke="#9db89d" 
+    stroke-width="1.5" 
+    fill="none" 
+    stroke-linecap="round"
+  />
+  
+  <!-- Lower tidal wave - thicker and more pronounced -->
+  <path 
+    d="M 40 68 Q 105 55 155 65 Q 210 75 270 60" 
+    stroke="#7a9b7a" 
+    stroke-width="3" 
+    fill="none" 
+    stroke-linecap="round"
+  />
+</svg>

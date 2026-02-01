@@ -164,16 +164,30 @@ a:hover {
     gap: 1rem;
 }
 
-.navbar-logo {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    font-weight: 600;
+.navbar-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
     color: var(--text-primary);
-    letter-spacing: 0.5px;
+    transition: opacity 0.25s ease, filter 0.25s ease;
 }
 
-.navbar-logo:hover {
-    color: var(--accent);
+.navbar-brand:hover {
+    opacity: 0.88;
+    filter: brightness(0.98);
+}
+
+.navbar-brand:focus-visible {
+    outline: 2px solid rgba(110, 140, 120, 0.35);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.navbar-logo-image {
+    height: 1.8rem;
+    width: auto;
+    display: block;
 }
 
 .navbar-center {
@@ -1304,6 +1318,10 @@ a:hover {
     .navbar-container {
         flex-direction: column;
         gap: 1rem;
+    }
+
+    .navbar-logo-image {
+        height: 1.6rem;
     }
     
     .navbar-center {

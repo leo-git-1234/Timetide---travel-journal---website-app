@@ -2,7 +2,13 @@
     <div class="navbar-container">
         <!-- Left: Timetide Logo -->
         <div class="navbar-left">
-            <a href="/" class="navbar-logo">Timetide</a>
+            <a href="/" class="navbar-brand" aria-label="Timetide home">
+                <img
+                    src="{{ url_for('static', path='/images/timetide-logo.svg') }}?v=2"
+                    alt="Timetide logo"
+                    class="navbar-logo-image"
+                >
+            </a>
         </div>
         
         <!-- Center: Navigation Links (only for authenticated users) -->
