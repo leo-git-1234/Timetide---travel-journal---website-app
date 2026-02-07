@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Trips - Timetide{% endblock %}
+{% block title %}Home - Timetide{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -8,10 +8,10 @@
     /* Map Banner */
     .map-banner {
         position: relative;
-        height: 350px;
+        height: 180px;
         width: 100%;
-        margin-bottom: 2rem;
-        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
@@ -208,7 +208,7 @@
 
     /* Dashboard Header */
     .dashboard-header {
-        padding: 3rem 2rem;
+        padding: 0.75rem 2rem;
         background: linear-gradient(135deg, rgba(122,166,147,0.08), rgba(122,166,147,0.02));
         border-bottom: 1px solid var(--border);
     }
@@ -228,23 +228,27 @@
 
     /* Primary Trip Focus Area */
     .primary-trip-section {
-        padding: 3rem 2rem;
+        padding: 2rem 2rem 2.5rem;
         border-bottom: 1px solid var(--border);
     }
 
     .primary-trip-container {
         display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 3rem;
-        align-items: start;
+        grid-template-columns: 1fr;
+        max-width: 980px;
+        margin: 0 auto;
+        border-radius: 18px;
+        background: #fbf9f4;
+        box-shadow: 0 10px 24px rgba(23, 33, 46, 0.08);
+        overflow: hidden;
     }
 
     .primary-trip-media {
         position: relative;
-        border-radius: 16px;
+        border-radius: 0;
         overflow: hidden;
         background: var(--border);
-        aspect-ratio: 4 / 3;
+        height: 190px;
     }
 
     .primary-trip-image {
@@ -256,65 +260,96 @@
     .primary-trip-info {
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1rem;
+        padding: 1.75rem 2rem 2rem;
     }
 
     .primary-trip-header {
         display: flex;
         flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .primary-trip-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 1rem;
     }
 
     .primary-trip-title {
         font-family: var(--font-serif);
-        font-size: 2rem;
+        font-size: 1.9rem;
         margin: 0;
-        color: var(--text-primary);
-        line-height: 1.2;
+        color: #2a2a28;
+        letter-spacing: 0.2px;
     }
 
-    .primary-trip-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        font-size: 1rem;
-        color: var(--text-secondary);
+    .primary-trip-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.06);
+        color: #6c6c68;
+        font-size: 0.65rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .primary-trip-date {
+        font-size: 0.85rem;
+        color: #7a7a76;
     }
 
     .primary-trip-description {
+        font-family: var(--font-serif);
         font-size: 1rem;
-        line-height: 1.6;
-        color: var(--text);
+        line-height: 1.7;
+        color: #5a5a57;
         font-style: italic;
     }
 
+    .primary-trip-divider {
+        width: 100%;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.06);
+        margin: 0.75rem 0 0.25rem;
+    }
+
     .primary-trip-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        padding: 2rem;
-        background: var(--surface);
-        border-radius: 12px;
-        border: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        padding: 0.6rem 0 0;
     }
 
     .stat-item {
-        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        color: #6b6b67;
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
     }
 
     .stat-value {
         font-family: var(--font-serif);
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0 0 0.25rem 0;
-        color: var(--accent);
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin: 0;
+        color: #6b6b67;
     }
 
     .stat-label {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.7rem;
+        color: #6b6b67;
     }
 
     .primary-trip-action {
@@ -403,22 +438,30 @@
     /* Trips Grid */
     .trips-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
     }
 
     .trip-card {
         position: relative;
-        border-radius: 12px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
+        background: #fbfaf7;
+        box-shadow: 0 10px 24px rgba(23, 33, 46, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
     }
 
     .trip-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(23, 33, 46, 0.12);
+    }
+
+    .trip-card-media {
+        position: relative;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        overflow: hidden;
     }
 
     .trip-card-image {
@@ -428,66 +471,110 @@
         display: block;
     }
 
+    .trip-card-overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 1.25rem 1.25rem 1rem;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(12, 18, 24, 0.65) 100%);
+        color: #f7f5f2;
+    }
+
     .trip-card-content {
-        padding: 1.5rem;
-        background: white;
+        padding: 1.25rem 1.25rem 1rem;
+        background: transparent;
     }
 
     .trip-card-title {
-        font-size: 1.1rem;
+        font-family: var(--font-serif);
+        font-size: 1.25rem;
         font-weight: 600;
-        margin: 0 0 0.5rem 0;
-        color: var(--text-primary);
+        margin: 0 0 0.35rem 0;
+        color: #f7f5f2;
+        letter-spacing: 0.2px;
     }
 
     .trip-card-dates {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        color: rgba(247, 245, 242, 0.85);
+        margin: 0;
     }
 
-    .trip-card-description {
+    .trip-card-excerpt {
         font-size: 0.9rem;
-        color: var(--text);
-        margin: 0;
-        line-height: 1.5;
+        color: var(--text-primary);
+        margin: 0 0 0.85rem 0;
+        line-height: 1.6;
+        font-style: italic;
+    }
+
+    .trip-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.1rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .trip-card-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .trip-card-meta .meta-icon {
+        font-size: 0.85rem;
     }
 
     /* Trip Card Actions */
     .trip-card-actions {
         display: flex;
-        gap: 0.5rem;
-        padding: 1rem 1.5rem 0 1.5rem;
-        border-top: 1px solid var(--border);
-        margin-top: 1rem;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0 1.25rem 1.25rem;
     }
 
     .trip-card-btn {
-        flex: 1;
-        padding: 0.625rem 1rem;
-        border: 1px solid var(--border);
-        background: white;
-        color: var(--text-primary);
-        font-size: 0.85rem;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
         font-weight: 500;
-        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        padding: 0;
     }
 
     .trip-card-btn:hover {
-        background: var(--surface);
-        border-color: var(--accent);
         color: var(--accent);
     }
 
     .trip-card-btn.delete {
         color: #d84444;
-        border-color: #d84444;
     }
 
     .trip-card-btn.delete:hover {
-        background: color-mix(in srgb, #d84444 12%, white);
+        color: #b93636;
+    }
+
+    .trip-card-open {
+        margin-left: auto;
+        padding: 0.5rem 1.1rem;
+        border-radius: 999px;
+        background: rgba(122, 155, 122, 0.18);
+        color: #2a3a52;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .trip-card-open:hover {
+        background: rgba(122, 155, 122, 0.28);
+        transform: translateY(-1px);
     }
 
     /* Responsive Design */
@@ -558,6 +645,276 @@
             width: 100%;
         }
     }
+
+    /* Journey Timeline */
+    .timeline-container {
+        position: relative;
+        width: 100%;
+        background: #fdfbf8;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: none;
+    }
+
+    .timeline-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        position: relative;
+        height: 60px;
+    }
+
+    .timeline-line {
+        position: absolute;
+        top: 50%;
+        left: 3%;
+        right: 3%;
+        height: 2px;
+        background: linear-gradient(90deg, 
+            #9db89d 0%, 
+            #a8bfa8 25%, 
+            #8aa18f 50%, 
+            #a8bfa8 75%, 
+            #9db89d 100%);
+        transform: translateY(-1px);
+        z-index: 1;
+    }
+
+    .timeline-nodes {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 100%;
+        padding: 0 2%;
+        z-index: 2;
+    }
+
+    .timeline-node {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+
+    .timeline-node-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #fbf9f4 center / cover no-repeat;
+        border: 2.5px solid #8aa18f;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 3;
+        box-shadow: 0 2px 6px rgba(122, 166, 147, 0.15);
+        overflow: hidden;
+    }
+
+    .timeline-node:hover .timeline-node-circle {
+        width: 52px;
+        height: 52px;
+        border-color: #7aa693;
+        box-shadow: 0 4px 12px rgba(122, 166, 147, 0.25);
+        transform: scale(1.1);
+    }
+
+    .timeline-node.active .timeline-node-circle {
+        width: 54px;
+        height: 54px;
+        background-size: cover;
+        border-color: #6a9683;
+        box-shadow: 0 6px 16px rgba(122, 166, 147, 0.3);
+    }
+
+    .timeline-node-label {
+        position: absolute;
+        bottom: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: normal;
+        font-size: 0.75rem;
+        color: #5a5a57;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        max-width: 85px;
+        text-align: center;
+        overflow: visible;
+        pointer-events: none;
+        font-family: var(--font-serif);
+        line-height: 1.25;
+        z-index: 5;
+    }
+
+    .timeline-node:hover .timeline-node-label {
+        color: #5a5a57;
+        font-weight: 600;
+    }
+
+    .timeline-tooltip {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%) translateY(10px);
+        background: white;
+        border: 1px solid #e8e6e0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        color: #5a5a57;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .timeline-tooltip::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid white;
+        border-top-color: white;
+    }
+
+    .timeline-node:hover .timeline-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .timeline-tooltip-title {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #2a2a28;
+    }
+
+    .timeline-tooltip-date {
+        display: block;
+        font-size: 0.7rem;
+        color: #9a9a96;
+    }
+
+    @media (max-width: 768px) {
+        .timeline-container {
+            padding: 2rem 1rem;
+        }
+
+        .timeline-wrapper {
+            height: 140px;
+        }
+
+        .timeline-node-label {
+            font-size: 0.65rem;
+            bottom: -40px;
+        }
+
+        .timeline-tooltip {
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Entry Card Overlay */
+    .entry-card-overlay {
+        position: fixed;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        z-index: 500;
+        max-width: 220px;
+        width: auto;
+        border: 1px solid var(--border);
+        display: none;
+        backdrop-filter: blur(8px);
+    }
+
+    .entry-card-overlay.show {
+        display: block;
+        animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .entry-card-title {
+        font-family: var(--font-serif);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #2a2a28;
+        margin: 0 0 0.35rem 0;
+        line-height: 1.3;
+    }
+
+    .entry-card-meta {
+        font-size: 0.75rem;
+        color: #7a7a76;
+        margin-bottom: 0.6rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .entry-card-button {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        font-size: 0.75rem;
+    }
+
+    .entry-card-button:hover {
+        filter: brightness(0.95);
+        transform: translateY(-1px);
+    }
+
+    .entry-card-close {
+        position: absolute;
+        top: 0.4rem;
+        right: 0.4rem;
+        background: none;
+        border: none;
+        color: #7a7a76;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        padding: 0;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .entry-card-close:hover {
+        color: #2a2a28;
+    }
 </style>
 {% endblock %}
 
@@ -598,6 +955,22 @@
             </div>
         </div>
 
+        <!-- Journey Timeline -->
+        <div id="timelineContainer" class="timeline-container">
+            <div class="timeline-wrapper">
+                <div class="timeline-line" aria-hidden="true"></div>
+                <div class="timeline-nodes" id="timelineNodes"></div>
+            </div>
+        </div>
+
+        <!-- Entry Card Overlay -->
+        <div id="entryCardOverlay" class="entry-card-overlay">
+            <button id="entryCardClose" class="entry-card-close">×</button>
+            <h3 id="entryCardTitle" class="entry-card-title"></h3>
+            <div id="entryCardMeta" class="entry-card-meta"></div>
+            <a id="entryCardButton" href="#" class="entry-card-button">View Entry →</a>
+        </div>
+
         <!-- Dashboard Header -->
         <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <div>
@@ -618,13 +991,15 @@
                 <!-- Info -->
                 <div class="primary-trip-info">
                     <div class="primary-trip-header">
-                        <h2 id="primaryTripTitle" class="primary-trip-title"></h2>
-                        <div class="primary-trip-meta">
-                            <div id="primaryTripDates"></div>
-                            <div id="primaryTripLocation"></div>
+                        <div class="primary-trip-title-row">
+                            <h2 id="primaryTripTitle" class="primary-trip-title"></h2>
+                            <span class="primary-trip-badge">✔ Archived</span>
                         </div>
+                        <div id="primaryTripDates" class="primary-trip-date"></div>
                         <p id="primaryTripDescription" class="primary-trip-description"></p>
                     </div>
+
+                    <div class="primary-trip-divider" aria-hidden="true"></div>
 
                     <!-- Statistics -->
                     <div class="primary-trip-stats" id="primaryTripStats"></div>
@@ -724,35 +1099,27 @@
         img.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
         img.alt = `${trip.title} cover`;
 
-        // Title and Meta
+        // Title and dates
         document.getElementById('primaryTripTitle').textContent = trip.title;
         document.getElementById('primaryTripDates').textContent = formatDateRange(trip.start_date, trip.end_date);
-        document.getElementById('primaryTripLocation').textContent = trip.location;
         
         // Description
         const desc = document.getElementById('primaryTripDescription');
         desc.textContent = trip.description || 'A journey preserved in time';
         desc.style.display = trip.description ? 'block' : 'none';
 
-        // Statistics
+
+        // Metadata tags
         const statsContainer = document.getElementById('primaryTripStats');
+        const daysCount = calculateDays(trip.start_date, trip.end_date);
+        const entriesCount = trip.statistics?.num_entries || 0;
+        const photosCount = trip.statistics?.num_photos || 0;
+        const placesCount = trip.statistics?.num_locations || 0;
         statsContainer.innerHTML = `
-            <div class="stat-item">
-                <div class="stat-value">${calculateDays(trip.start_date, trip.end_date)}</div>
-                <div class="stat-label">Days</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">${trip.statistics?.num_entries || 0}</div>
-                <div class="stat-label">Entries</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">${trip.statistics?.num_photos || 0}</div>
-                <div class="stat-label">Photos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value">${trip.statistics?.num_locations || 0}</div>
-                <div class="stat-label">Locations</div>
-            </div>
+            <span class="stat-item"><span class="stat-value">${daysCount}</span><span class="stat-label">Days</span></span>
+            <span class="stat-item"><span class="stat-value">${entriesCount}</span><span class="stat-label">Entries</span></span>
+            <span class="stat-item"><span class="stat-value">${placesCount}</span><span class="stat-label">Places</span></span>
+            <span class="stat-item"><span class="stat-value">${photosCount}</span><span class="stat-label">Photos</span></span>
         `;
 
         section.style.display = 'block';
@@ -791,29 +1158,58 @@
             }
         };
 
+        const media = document.createElement('div');
+        media.className = 'trip-card-media';
+
         const img = document.createElement('img');
         img.alt = `${trip.title} cover`;
         img.className = 'trip-card-image';
         img.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
-        cardClickable.appendChild(img);
+        media.appendChild(img);
 
-        const content = document.createElement('div');
-        content.className = 'trip-card-content';
+        const overlay = document.createElement('div');
+        overlay.className = 'trip-card-overlay';
 
         const title = document.createElement('h3');
         title.className = 'trip-card-title';
         title.textContent = trip.title;
-        content.appendChild(title);
+        overlay.appendChild(title);
 
         const dates = document.createElement('div');
         dates.className = 'trip-card-dates';
         dates.textContent = formatDateRange(trip.start_date, trip.end_date);
-        content.appendChild(dates);
+        overlay.appendChild(dates);
+
+        media.appendChild(overlay);
+        cardClickable.appendChild(media);
+
+        const content = document.createElement('div');
+        content.className = 'trip-card-content';
 
         const description = document.createElement('p');
-        description.className = 'trip-card-description';
+        description.className = 'trip-card-excerpt';
         description.textContent = trip.description || 'A quiet note in time';
         content.appendChild(description);
+
+        const meta = document.createElement('div');
+        meta.className = 'trip-card-meta';
+
+        const start = new Date(trip.start_date);
+        const end = new Date(trip.end_date);
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const durationDays = Math.max(1, Math.round((end - start) / msPerDay) + 1);
+
+        const entriesCount = trip.entries_count ?? trip.entries ?? 0;
+        const placesCount = trip.places_count ?? trip.places ?? 0;
+        const photosCount = trip.photos_count ?? trip.photos ?? 0;
+
+        meta.innerHTML = `
+            <span><span class="meta-icon">🗓️</span>${durationDays} days</span>
+            <span><span class="meta-icon">📝</span>${entriesCount} entries</span>
+            <span><span class="meta-icon">📍</span>${placesCount} places</span>
+            <span><span class="meta-icon">📷</span>${photosCount} photos</span>
+        `;
+        content.appendChild(meta);
 
         cardClickable.appendChild(content);
         article.appendChild(cardClickable);
@@ -824,7 +1220,7 @@
 
         const editBtn = document.createElement('button');
         editBtn.className = 'trip-card-btn';
-        editBtn.textContent = '✏️ Edit';
+        editBtn.textContent = 'Edit';
         editBtn.onclick = (e) => {
             e.stopPropagation();
             window.location.href = `/trip/${trip.id}/edit`;
@@ -833,7 +1229,7 @@
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'trip-card-btn delete';
-        deleteBtn.textContent = '🗑️ Delete';
+        deleteBtn.textContent = 'Delete';
         deleteBtn.onclick = async (e) => {
             e.stopPropagation();
             if (confirm(`Are you sure you want to delete "${trip.title}"? This cannot be undone.`)) {
@@ -841,6 +1237,15 @@
             }
         };
         actions.appendChild(deleteBtn);
+
+        const openBtn = document.createElement('button');
+        openBtn.className = 'trip-card-open';
+        openBtn.textContent = 'Open Journey →';
+        openBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.location.href = `/trip/${trip.id}`;
+        };
+        actions.appendChild(openBtn);
 
         article.appendChild(actions);
         return article;
@@ -948,6 +1353,7 @@
                 renderPrimaryTrip(allTrips[0]);
                 renderTripsGrid(allTrips);
                 renderDashboardMap(allTrips);
+                renderTimeline(allTrips);
             }
         } catch (error) {
             console.error('Error loading trips:', error);
@@ -1032,6 +1438,181 @@
             }
         }, 200);
     }
+
+    // Render journey timeline
+    async function renderTimeline(trips) {
+        const timelineContainer = document.getElementById('timelineContainer');
+        const timelineNodes = document.getElementById('timelineNodes');
+        
+        if (!trips || trips.length === 0) {
+            timelineContainer.style.display = 'none';
+            return;
+        }
+
+        // Collect all entries from all trips
+        let allEntries = [];
+        try {
+            for (const trip of trips) {
+                try {
+                    const response = await fetch(`/trips/${trip.id}`, { credentials: 'include' });
+                    if (response.ok) {
+                        const fullTrip = await response.json();
+                        if (fullTrip.entries && fullTrip.entries.length > 0) {
+                            allEntries = allEntries.concat(fullTrip.entries.map(entry => ({
+                                ...entry,
+                                trip_id: trip.id,
+                                trip_title: trip.title
+                            })));
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error loading entries for trip ${trip.id}:`, error);
+                }
+            }
+        } catch (error) {
+            console.error('Error collecting timeline entries:', error);
+        }
+
+        // If no entries, hide timeline
+        if (allEntries.length === 0) {
+            timelineContainer.style.display = 'none';
+            return;
+        }
+
+        // Sort entries by date
+        allEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+        // Limit to last 8 entries to avoid crowding
+        const displayEntries = allEntries.slice(-8);
+
+        // Clear previous nodes
+        timelineNodes.innerHTML = '';
+
+        // Create timeline nodes
+        displayEntries.forEach((entry, index) => {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'timeline-node';
+            if (index === displayEntries.length - 1) {
+                nodeElement.classList.add('active');
+            }
+
+            const circle = document.createElement('div');
+            circle.className = 'timeline-node-circle';
+            
+            // Set background image from first photo or placeholder
+            let entryImage = '/static/images/placeholder-trip.jpg';
+            if (entry.photos && entry.photos.length > 0) {
+                entryImage = entry.photos[0].url;
+            }
+            circle.style.backgroundImage = `url('${entryImage}')`;
+
+            // Format entry date and time for label
+            const entryDate = new Date(entry.entry_date);
+            const dateStr = entryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const timeStr = entry.entry_time || '—';
+            
+            const label = document.createElement('div');
+            label.className = 'timeline-node-label';
+            // Show location/place name as title, with date and time
+            const locationName = entry.location?.place_name || entry.location?.address || 'Unknown Location';
+            label.innerHTML = `<strong>${locationName}</strong><br><small>${dateStr}, ${timeStr}</small>`;
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'timeline-tooltip';
+            const tooltipTitle = document.createElement('span');
+            tooltipTitle.className = 'timeline-tooltip-title';
+            tooltipTitle.textContent = entry.trip_title;
+            tooltip.appendChild(tooltipTitle);
+            
+            const tooltipDate = document.createElement('span');
+            tooltipDate.className = 'timeline-tooltip-date';
+            tooltipDate.textContent = `${dateStr}, ${timeStr}`;
+            tooltip.appendChild(tooltipDate);
+
+            nodeElement.appendChild(circle);
+            nodeElement.appendChild(label);
+            nodeElement.appendChild(tooltip);
+
+            // Click handler - pan map to entry location and show card
+            nodeElement.onclick = () => {
+                // Pan map if location exists
+                if (dashMap && entry.location && entry.location.latitude && entry.location.longitude) {
+                    const lat = parseFloat(entry.location.latitude);
+                    const lng = parseFloat(entry.location.longitude);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        dashMap.setView([lat, lng], Math.max(dashMap.getZoom(), 13), {
+                            animate: true,
+                            duration: 0.8
+                        });
+                    }
+                }
+
+                // Update active state
+                document.querySelectorAll('.timeline-node').forEach(node => {
+                    node.classList.remove('active');
+                });
+                nodeElement.classList.add('active');
+
+                // Show entry card positioned at node
+                showEntryCard(entry, nodeElement);
+            };
+
+            timelineNodes.appendChild(nodeElement);
+        });
+
+        // Show timeline
+        timelineContainer.style.display = 'block';
+    }
+
+    // Show entry card overlay positioned at clicked node
+    function showEntryCard(entry, nodeElement) {
+        const card = document.getElementById('entryCardOverlay');
+        
+        // Populate card content
+        document.getElementById('entryCardTitle').textContent = entry.content ? entry.content.substring(0, 35) : 'Moment';
+        
+        const entryDate = new Date(entry.entry_date);
+        const dateStr = entryDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric'
+        });
+        const timeStr = entry.entry_time || '—';
+        const metaLines = [
+            `${dateStr}, ${timeStr}`
+        ];
+        document.getElementById('entryCardMeta').innerHTML = metaLines.map(line => `<span>${line}</span>`).join('');
+        
+        // Set button link to view entry - navigate to trip detail page with entry
+        document.getElementById('entryCardButton').href = `/trip/${entry.trip_id}`;
+        
+        // Position card above the node
+        if (nodeElement) {
+            const rect = nodeElement.getBoundingClientRect();
+            const cardWidth = 220;
+            const cardHeight = 140; // approximate height
+            
+            // Position above the node, centered horizontally
+            const top = rect.top - cardHeight - 10; // 10px gap above node
+            const left = rect.left + (rect.width / 2) - (cardWidth / 2);
+            
+            card.style.top = top + 'px';
+            card.style.left = left + 'px';
+        }
+        
+        // Show card
+        card.classList.add('show');
+    }
+
+    // Close entry card
+    function closeEntryCard() {
+        const card = document.getElementById('entryCardOverlay');
+        card.classList.remove('show');
+    }
+
+    // Set up close button and click outside handlers
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('entryCardClose').addEventListener('click', closeEntryCard);
+    });
 
     // Load on page load
     document.addEventListener('DOMContentLoaded', loadTrips);

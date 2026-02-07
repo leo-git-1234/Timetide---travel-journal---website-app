@@ -39,3 +39,6 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class UserPreferencesUpdate(BaseModel):
+    language: Optional[str] = None

@@ -39,6 +39,10 @@ class ProfileVisibilityUpdate(BaseModel):
     is_profile_public: bool
 
 
+class UserPreferencesUpdate(BaseModel):
+    language: Optional[str] = None
+
+
 @router.get("/me")
 async def get_current_user_profile(current_user: User = Depends(get_current_user)):
     """Get current authenticated user profile."""
@@ -234,6 +238,25 @@ async def update_profile_visibility(
     
     visibility_status = "public" if update_data.is_profile_public else "private"
     return {"message": f"Profile is now {visibility_status}", "is_profile_public": update_data.is_profile_public}
+
+
+@router.put("/me/preferences")
+async def update_preferences(
+    update_data: UserPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update user preferences (language, etc.)."""
+    if update_data.language:
+        current_user.language = update_data.language.lower()
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    return {
+        "message": "Preferences updated successfully",
+        "language": current_user.language
+    }
 
 
 @router.delete("/me")

@@ -19,6 +19,9 @@
     <!-- Footer (optional for future use) -->
     {% block footer %}{% endblock %}
     
+    <!-- Dynamic Translation System -->
+    <script src="{{ url_for('static', path='/js/translator.js') }}"></script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -53,6 +53,7 @@ class User(Base):
     bio = Column(Text, nullable=True)
     avatar_url = Column(String(500), nullable=True)
     is_profile_public = Column(Boolean, default=False)
+    language = Column(String(10), default='en', nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

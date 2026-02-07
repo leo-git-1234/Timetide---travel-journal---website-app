@@ -404,6 +404,97 @@
         </div>
     </div>
 
+    <!-- Preferences Section -->
+    <div class="settings-section">
+        <h2 class="settings-section-title">Preferences</h2>
+
+        <div class="settings-row">
+            <div class="settings-label">
+                <span class="settings-label-title">Language</span>
+                <span class="settings-label-desc">Choose your preferred language</span>
+            </div>
+            <div class="settings-action">
+                <select id="languageSelect" class="form-select" style="width: 220px;" onchange="changeLanguage(this.value)">
+                    <option value="en" {% if current_user.language == 'en' %}selected{% endif %}>English</option>
+                    <option value="es" {% if current_user.language == 'es' %}selected{% endif %}>Español (Spanish)</option>
+                    <option value="fr" {% if current_user.language == 'fr' %}selected{% endif %}>Français (French)</option>
+                    <option value="de" {% if current_user.language == 'de' %}selected{% endif %}>Deutsch (German)</option>
+                    <option value="it" {% if current_user.language == 'it' %}selected{% endif %}>Italiano (Italian)</option>
+                    <option value="pt" {% if current_user.language == 'pt' %}selected{% endif %}>Português (Portuguese)</option>
+                    <option value="ru" {% if current_user.language == 'ru' %}selected{% endif %}>Русский (Russian)</option>
+                    <option value="nl" {% if current_user.language == 'nl' %}selected{% endif %}>Nederlands (Dutch)</option>
+                    <option value="pl" {% if current_user.language == 'pl' %}selected{% endif %}>Polski (Polish)</option>
+                    <option value="tr" {% if current_user.language == 'tr' %}selected{% endif %}>Türkçe (Turkish)</option>
+                    <option value="ja" {% if current_user.language == 'ja' %}selected{% endif %}>日本語 (Japanese)</option>
+                    <option value="ko" {% if current_user.language == 'ko' %}selected{% endif %}>한국어 (Korean)</option>
+                    <option value="zh" {% if current_user.language == 'zh' %}selected{% endif %}>中文 (Chinese Simplified)</option>
+                    <option value="zh-TW" {% if current_user.language == 'zh-TW' %}selected{% endif %}>繁體中文 (Chinese Traditional)</option>
+                    <option value="hi" {% if current_user.language == 'hi' %}selected{% endif %}>हिन्दी (Hindi)</option>
+                    <option value="ar" {% if current_user.language == 'ar' %}selected{% endif %}>العربية (Arabic)</option>
+                    <option value="vi" {% if current_user.language == 'vi' %}selected{% endif %}>Tiếng Việt (Vietnamese)</option>
+                    <option value="th" {% if current_user.language == 'th' %}selected{% endif %}>ไทย (Thai)</option>
+                    <option value="id" {% if current_user.language == 'id' %}selected{% endif %}>Bahasa Indonesia (Indonesian)</option>
+                    <option value="ms" {% if current_user.language == 'ms' %}selected{% endif %}>Bahasa Melayu (Malay)</option>
+                    <option value="fil" {% if current_user.language == 'fil' %}selected{% endif %}>Filipino (Filipino)</option>
+                    <option value="sv" {% if current_user.language == 'sv' %}selected{% endif %}>Svenska (Swedish)</option>
+                    <option value="no" {% if current_user.language == 'no' %}selected{% endif %}>Norsk (Norwegian)</option>
+                    <option value="da" {% if current_user.language == 'da' %}selected{% endif %}>Dansk (Danish)</option>
+                    <option value="fi" {% if current_user.language == 'fi' %}selected{% endif %}>Suomi (Finnish)</option>
+                    <option value="cs" {% if current_user.language == 'cs' %}selected{% endif %}>Čeština (Czech)</option>
+                    <option value="sk" {% if current_user.language == 'sk' %}selected{% endif %}>Slovenčina (Slovak)</option>
+                    <option value="hu" {% if current_user.language == 'hu' %}selected{% endif %}>Magyar (Hungarian)</option>
+                    <option value="ro" {% if current_user.language == 'ro' %}selected{% endif %}>Română (Romanian)</option>
+                    <option value="bg" {% if current_user.language == 'bg' %}selected{% endif %}>Български (Bulgarian)</option>
+                    <option value="hr" {% if current_user.language == 'hr' %}selected{% endif %}>Hrvatski (Croatian)</option>
+                    <option value="sr" {% if current_user.language == 'sr' %}selected{% endif %}>Srpski (Serbian)</option>
+                    <option value="uk" {% if current_user.language == 'uk' %}selected{% endif %}>Українська (Ukrainian)</option>
+                    <option value="el" {% if current_user.language == 'el' %}selected{% endif %}>Ελληνικά (Greek)</option>
+                    <option value="he" {% if current_user.language == 'he' %}selected{% endif %}>עברית (Hebrew)</option>
+                    <option value="fa" {% if current_user.language == 'fa' %}selected{% endif %}>فارسی (Persian)</option>
+                    <option value="ur" {% if current_user.language == 'ur' %}selected{% endif %}>اردو (Urdu)</option>
+                    <option value="bn" {% if current_user.language == 'bn' %}selected{% endif %}>বাংলা (Bengali)</option>
+                    <option value="ta" {% if current_user.language == 'ta' %}selected{% endif %}>தமிழ் (Tamil)</option>
+                    <option value="te" {% if current_user.language == 'te' %}selected{% endif %}>తెలుగు (Telugu)</option>
+                    <option value="kn" {% if current_user.language == 'kn' %}selected{% endif %}>ಕನ್ನಡ (Kannada)</option>
+                    <option value="ml" {% if current_user.language == 'ml' %}selected{% endif %}>മലയാളം (Malayalam)</option>
+                    <option value="gu" {% if current_user.language == 'gu' %}selected{% endif %}>ગુજરાતી (Gujarati)</option>
+                    <option value="pa" {% if current_user.language == 'pa' %}selected{% endif %}>ਪੰਜਾਬੀ (Punjabi)</option>
+                    <option value="my" {% if current_user.language == 'my' %}selected{% endif %}>မြန်မာ (Burmese)</option>
+                    <option value="km" {% if current_user.language == 'km' %}selected{% endif %}>ខ្មែរ (Khmer)</option>
+                    <option value="lo" {% if current_user.language == 'lo' %}selected{% endif %}>ລາວ (Lao)</option>
+                    <option value="si" {% if current_user.language == 'si' %}selected{% endif %}>සිංහල (Sinhala)</option>
+                    <option value="ne" {% if current_user.language == 'ne' %}selected{% endif %}>नेपाली (Nepali)</option>
+                    <option value="af" {% if current_user.language == 'af' %}selected{% endif %}>Afrikaans</option>
+                    <option value="sq" {% if current_user.language == 'sq' %}selected{% endif %}>Shqip (Albanian)</option>
+                    <option value="hy" {% if current_user.language == 'hy' %}selected{% endif %}>Հայերեն (Armenian)</option>
+                    <option value="az" {% if current_user.language == 'az' %}selected{% endif %}>Azərbaycanca (Azerbaijani)</option>
+                    <option value="be" {% if current_user.language == 'be' %}selected{% endif %}>Беларускі (Belarusian)</option>
+                    <option value="bs" {% if current_user.language == 'bs' %}selected{% endif %}>Bosanski (Bosnian)</option>
+                    <option value="ca" {% if current_user.language == 'ca' %}selected{% endif %}>Català (Catalan)</option>
+                    <option value="et" {% if current_user.language == 'et' %}selected{% endif %}>Eesti (Estonian)</option>
+                    <option value="gl" {% if current_user.language == 'gl' %}selected{% endif %}>Galego (Galician)</option>
+                    <option value="ka" {% if current_user.language == 'ka' %}selected{% endif %}>ქართული (Georgian)</option>
+                    <option value="is" {% if current_user.language == 'is' %}selected{% endif %}>Íslenska (Icelandic)</option>
+                    <option value="ga" {% if current_user.language == 'ga' %}selected{% endif %}>Gaeilge (Irish)</option>
+                    <option value="lv" {% if current_user.language == 'lv' %}selected{% endif %}>Latviešu (Latvian)</option>
+                    <option value="lt" {% if current_user.language == 'lt' %}selected{% endif %}>Lietuvių (Lithuanian)</option>
+                    <option value="mk" {% if current_user.language == 'mk' %}selected{% endif %}>Македонски (Macedonian)</option>
+                    <option value="mt" {% if current_user.language == 'mt' %}selected{% endif %}>Malti (Maltese)</option>
+                    <option value="cy" {% if current_user.language == 'cy' %}selected{% endif %}>Cymraeg (Welsh)</option>
+                    <option value="eu" {% if current_user.language == 'eu' %}selected{% endif %}>Euskera (Basque)</option>
+                    <option value="jv" {% if current_user.language == 'jv' %}selected{% endif %}>Basa Jawa (Javanese)</option>
+                    <option value="su" {% if current_user.language == 'su' %}selected{% endif %}>Basa Sunda (Sundanese)</option>
+                    <option value="sw" {% if current_user.language == 'sw' %}selected{% endif %}>Kiswahili (Swahili)</option>
+                    <option value="am" {% if current_user.language == 'am' %}selected{% endif %}>አማርኛ (Amharic)</option>
+                    <option value="ig" {% if current_user.language == 'ig' %}selected{% endif %}>Igbo</option>
+                    <option value="yo" {% if current_user.language == 'yo' %}selected{% endif %}>Yorùbá (Yoruba)</option>
+                    <option value="zu" {% if current_user.language == 'zu' %}selected{% endif %}>Zulu</option>
+                    <option value="xh" {% if current_user.language == 'xh' %}selected{% endif %}>Xhosa</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Danger Zone Section -->
     <div class="settings-section">
         <h2 class="settings-section-title">Danger Zone</h2>
@@ -777,6 +868,62 @@ async function confirmDeleteAccount() {
         }, 2000);
     } catch (error) {
         showAlert('deleteAccountAlert', error.message, 'error');
+    }
+}
+
+// Language Preferences
+async function changeLanguage(languageCode) {
+    try {
+        const response = await fetch('/users/me/preferences', {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ language: languageCode })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to change language');
+        }
+        
+        const data = await response.json();
+        
+        // Use the dynamic translator to translate the entire page
+        if (window.translator) {
+            await window.translator.changeLanguage(languageCode);
+        }
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success show';
+        alert.style.position = 'fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '10000';
+        alert.textContent = 'Language preference updated successfully!';
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+        
+    } catch (error) {
+        console.error('Error changing language:', error);
+        document.getElementById('languageSelect').value = localStorage.getItem('userLanguage') || 'en';
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-error show';
+        alert.style.position = 'fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '10000';
+        alert.textContent = 'Failed to change language: ' + error.message;
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
     }
 }
 

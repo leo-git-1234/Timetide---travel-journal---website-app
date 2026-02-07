@@ -25,6 +25,66 @@
         to { transform: rotate(360deg); }
     }
 
+    /* V2 Home Hero */
+    .journey-hero {
+        position: relative;
+        padding: 4.5rem 1.5rem 3.5rem;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.96)),
+            url('/static/images/placeholder-trip.jpg');
+        background-size: cover;
+        background-position: center;
+        border-bottom: 1px solid rgba(110, 140, 120, 0.12);
+    }
+
+    .journey-hero-content {
+        max-width: 980px;
+        margin: 0 auto;
+        text-align: left;
+    }
+
+    .journey-hero-title {
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: clamp(2.3rem, 3.5vw, 3.2rem);
+        color: var(--text-strong, #1d1d1b);
+        margin: 0 0 0.75rem 0;
+        letter-spacing: 0.2px;
+    }
+
+    .journey-hero-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted, #5c5a57);
+        max-width: 640px;
+        line-height: 1.7;
+        margin: 0;
+        font-style: italic;
+    }
+
+    .sage-wave-divider {
+        height: 26px;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='26' viewBox='0 0 200 26'><path d='M0 15 C30 5 60 25 100 15 C140 5 170 25 200 15' stroke='%2394ab98' stroke-width='2' fill='none' stroke-linecap='round'/><path d='M0 21 C35 12 70 28 100 20 C130 12 165 28 200 20' stroke='%238aa18f' stroke-width='3' fill='none' stroke-linecap='round' opacity='0.7'/></svg>");
+        background-repeat: repeat-x;
+        background-position: center;
+        margin: 0.5rem 0 2.5rem;
+        opacity: 0.8;
+    }
+
+    .journey-section-header {
+        margin: 2rem 0 1.5rem 0;
+    }
+
+    .journey-section-title {
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: 1.8rem;
+        margin: 0 0 0.4rem 0;
+        color: var(--text-strong, #1d1d1b);
+    }
+
+    .journey-section-subtitle {
+        margin: 0;
+        color: var(--text-muted, #5c5a57);
+        font-size: 0.95rem;
+    }
+
     /* Welcome card styles for unauthenticated users */
     .welcome-overlay {
         position: fixed;
@@ -161,27 +221,29 @@
     /* Trips grid */
     .trips-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
-        margin: 2rem 0;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0 3rem;
     }
 
     .trip-card {
         position: relative;
-        border-radius: 12px;
+        border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.04);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .trip-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.12);
     }
 
     .trip-card-image {
         width: 100%;
-        height: 200px;
+        height: 220px;
         object-fit: cover;
         display: block;
     }
@@ -192,7 +254,8 @@
     }
 
     .trip-card-title {
-        font-size: 1.1rem;
+        font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+        font-size: 1.25rem;
         font-weight: 600;
         margin: 0 0 0.5rem 0;
         color: var(--text-strong);
@@ -209,6 +272,26 @@
         color: var(--text);
         margin: 0;
         line-height: 1.5;
+    }
+
+    .trip-timeline {
+        margin-top: 1rem;
+    }
+
+    .trip-timeline-bar {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(140, 161, 149, 0.2);
+        overflow: hidden;
+    }
+
+    .trip-timeline-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(122, 155, 122, 0.8), rgba(122, 155, 122, 0.5));
+        width: 35%;
+        transition: width 0.3s ease;
     }
 
     @media (max-width: 600px) {
@@ -241,11 +324,18 @@
 {% endblock %}
 
 {% block content %}
+<section class="journey-hero">
+    <div class="journey-hero-content">
+        <h1 class="journey-hero-title">Your Journeys</h1>
+        <p class="journey-hero-subtitle">A quiet archive of places you’ve been and the moments you’ve kept—preserved gently over time.</p>
+    </div>
+</section>
+<div class="sage-wave-divider" aria-hidden="true"></div>
+
 <div class="container">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <h1 class="dashboard-title">Your Journeys</h1>
-        <p class="dashboard-subtitle">A collection of moments, carefully preserved</p>
+    <div class="journey-section-header">
+        <h2 class="journey-section-title">Your Journeys</h2>
+        <p class="journey-section-subtitle">Reflect on each passage, one page at a time.</p>
     </div>
     
     <!-- Loading State -->
@@ -445,6 +535,26 @@
         description.className = 'trip-card-mood';
         description.textContent = trip.description || 'A quiet note in time';
         content.appendChild(description);
+
+        const timeline = document.createElement('div');
+        timeline.className = 'trip-timeline';
+
+        const timelineBar = document.createElement('div');
+        timelineBar.className = 'trip-timeline-bar';
+
+        const timelineFill = document.createElement('div');
+        timelineFill.className = 'trip-timeline-fill';
+
+        const start = new Date(trip.start_date);
+        const end = new Date(trip.end_date);
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const durationDays = Math.max(1, Math.round((end - start) / msPerDay) + 1);
+        const fillPercent = Math.min(100, Math.max(18, (durationDays / 30) * 100));
+        timelineFill.style.width = `${fillPercent}%`;
+
+        timelineBar.appendChild(timelineFill);
+        timeline.appendChild(timelineBar);
+        content.appendChild(timeline);
 
         article.appendChild(content);
         return article;
