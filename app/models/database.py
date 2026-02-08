@@ -4,7 +4,7 @@ Uses SQLAlchemy ORM with support for PostgreSQL and SQLite.
 """
 
 from datetime import datetime
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Table, Date
+from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, Table, Date, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -151,6 +151,36 @@ class Trip(Base):
     
     def __repr__(self):
         return f"<Trip {self.title}>"
+
+
+class TripStatus(Base):
+    """Trip status model for manual completion tracking."""
+    __tablename__ = 'trip_statuses'
+
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey('trips.id'), unique=True, nullable=False)
+    status = Column(String(20), nullable=False, default='ongoing')
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<TripStatus {self.trip_id} {self.status}>"
+
+
+class TripFavorite(Base):
+    """User favorites for trips."""
+    __tablename__ = 'trip_favorites'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    trip_id = Column(Integer, ForeignKey('trips.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'trip_id', name='uq_trip_favorite_user_trip'),
+    )
+
+    def __repr__(self):
+        return f"<TripFavorite user={self.user_id} trip={self.trip_id}>"
 
 
 class Location(Base):

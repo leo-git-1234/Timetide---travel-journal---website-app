@@ -7,8 +7,9 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field
 
 from app.models import get_db
-from app.models.database import Trip, User, TripMedia, Entry, Photo, Location
-from app.core.security import decode_token
+from app.models.database import Trip, User, TripMedia, Entry, Photo, Location, TripStatus, TripFavorite
+from app.core.security import decode_token as decode_token_core
+from app.auth.jwt import decode_token as decode_token_legacy
 from fastapi import Request, Cookie
 from typing import Optional, List
 
@@ -85,6 +86,8 @@ class TripDetailOut(BaseModel):
     statistics: TripStatistics
     entries: List[EntryOut]
     contributors: List[ContributorOut]
+    status: Optional[str] = None
+    is_favorite: bool = False
     
     class Config:
         from_attributes = True
@@ -110,6 +113,24 @@ class TripUpdate(BaseModel):
     cover_image: Optional[str] = None  # No length cap; allows data URLs of any size
 
 
+class TripStatusUpdate(BaseModel):
+    status: str = Field(..., pattern='^(completed|ongoing)$')
+
+
+class TripFavoriteUpdate(BaseModel):
+    is_favorite: Optional[bool] = None
+
+
+class TripStatusOut(BaseModel):
+    trip_id: int
+    status: str
+
+
+class TripFavoriteOut(BaseModel):
+    trip_id: int
+    is_favorite: bool
+
+
 class TripOut(BaseModel):
     """Schema for trip response."""
     id: int
@@ -123,6 +144,8 @@ class TripOut(BaseModel):
     created_at: str
     updated_at: str
     statistics: Optional[TripStatistics] = None
+    status: Optional[str] = None
+    is_favorite: bool = False
 
     class Config:
         from_attributes = True
@@ -131,12 +154,33 @@ class TripOut(BaseModel):
 router = APIRouter()
 
 
+def resolve_trip_status(trip: Trip, status_map: dict[int, str] | None = None) -> str:
+    if status_map and trip.id in status_map:
+        return status_map[trip.id]
+    return 'completed' if trip.end_date < date.today() else 'ongoing'
+
+
+def get_favorite_set(db: Session, user_id: int, trip_ids: List[int]) -> set[int]:
+    if not trip_ids:
+        return set()
+    favorites = db.query(TripFavorite).filter(
+        TripFavorite.user_id == user_id,
+        TripFavorite.trip_id.in_(trip_ids)
+    ).all()
+    return {fav.trip_id for fav in favorites}
+
+
 # Helper function to get current user from cookies
 async def get_current_user_from_cookie(request: Request, db: Session = Depends(get_db)) -> User:
     """Extract and verify user from JWT token in cookies."""
     # Get token from cookie
     token = request.cookies.get("timetide_token")
-    
+
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[7:]
+
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -144,7 +188,9 @@ async def get_current_user_from_cookie(request: Request, db: Session = Depends(g
         )
     
     # Decode token
-    payload = decode_token(token)
+    payload = decode_token_core(token)
+    if not payload:
+        payload = decode_token_legacy(token)
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -153,6 +199,13 @@ async def get_current_user_from_cookie(request: Request, db: Session = Depends(g
     
     user_id = payload.get("sub")
     if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
@@ -176,6 +229,11 @@ async def get_trips(db: Session = Depends(get_db), current_user: User = Depends(
         joinedload(Trip.entries).joinedload(Entry.photos),
         joinedload(Trip.entries).joinedload(Entry.location)
     ).filter(Trip.owner_id == current_user.id).order_by(Trip.created_at.desc()).all()
+
+    trip_ids = [trip.id for trip in trips]
+    status_rows = db.query(TripStatus).filter(TripStatus.trip_id.in_(trip_ids)).all() if trip_ids else []
+    status_map = {row.trip_id: row.status for row in status_rows}
+    favorite_set = get_favorite_set(db, current_user.id, trip_ids)
     
     # Add statistics to each trip
     result = []
@@ -196,10 +254,61 @@ async def get_trips(db: Session = Depends(get_db), current_user: User = Depends(
                 "num_entries": trip.num_entries,
                 "num_photos": trip.num_photos,
                 "num_locations": trip.num_locations
-            }
+            },
+            "status": resolve_trip_status(trip, status_map),
+            "is_favorite": trip.id in favorite_set
         })
     
     return result
+
+
+@router.get("/favorites", response_model=List[TripOut])
+async def get_favorite_trips(db: Session = Depends(get_db), current_user: User = Depends(get_current_user_from_cookie)):
+    """Get all favorited trips for the current user."""
+    try:
+        favorite_rows = db.query(TripFavorite).filter(TripFavorite.user_id == current_user.id).all()
+        trip_ids = [fav.trip_id for fav in favorite_rows]
+        if not trip_ids:
+            return []
+
+        trips = db.query(Trip).options(
+            joinedload(Trip.entries).joinedload(Entry.photos),
+            joinedload(Trip.entries).joinedload(Entry.location)
+        ).filter(Trip.owner_id == current_user.id, Trip.id.in_(trip_ids)).order_by(Trip.created_at.desc()).all()
+
+        status_rows = db.query(TripStatus).filter(TripStatus.trip_id.in_(trip_ids)).all() if trip_ids else []
+        status_map = {row.trip_id: row.status for row in status_rows}
+        favorite_set = set(trip_ids)
+
+        result = []
+        for trip in trips:
+            result.append({
+                "id": trip.id,
+                "title": trip.title,
+                "location": trip.location or "",
+                "description": trip.description,
+                "start_date": trip.start_date,
+                "end_date": trip.end_date,
+                "cover_image": trip.cover_image,
+                "owner_id": trip.owner_id,
+                "created_at": trip.created_at.isoformat(),
+                "updated_at": trip.updated_at.isoformat(),
+                "statistics": {
+                    "num_days": trip.num_days,
+                    "num_entries": trip.num_entries,
+                    "num_photos": trip.num_photos,
+                    "num_locations": trip.num_locations
+                },
+                "status": resolve_trip_status(trip, status_map),
+                "is_favorite": trip.id in favorite_set
+            })
+
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to load favorites: {str(e)}"
+        )
 
 
 @router.get("/{trip_id}", response_model=TripDetailOut)
@@ -228,6 +337,11 @@ async def get_trip(trip_id: int, db: Session = Depends(get_db), current_user: Us
     unique_contributors = {c.id: c for c in contributors}.values()
     
     # Build response
+    status_row = db.query(TripStatus).filter(TripStatus.trip_id == trip.id).first()
+    favorite_row = db.query(TripFavorite).filter(
+        TripFavorite.trip_id == trip.id,
+        TripFavorite.user_id == current_user.id
+    ).first()
     return {
         "id": trip.id,
         "title": trip.title,
@@ -246,8 +360,61 @@ async def get_trip(trip_id: int, db: Session = Depends(get_db), current_user: Us
             "num_locations": trip.num_locations
         },
         "entries": sorted_entries,
-        "contributors": list(unique_contributors)
+        "contributors": list(unique_contributors),
+        "status": status_row.status if status_row else resolve_trip_status(trip),
+        "is_favorite": favorite_row is not None
     }
+
+
+@router.put("/{trip_id}/status", response_model=TripStatusOut)
+async def update_trip_status(trip_id: int, payload: TripStatusUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user_from_cookie)):
+    """Update a trip's status (completed/ongoing)."""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    if trip.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to update this trip")
+
+    status_row = db.query(TripStatus).filter(TripStatus.trip_id == trip_id).first()
+    if not status_row:
+        status_row = TripStatus(trip_id=trip_id, status=payload.status)
+        db.add(status_row)
+    else:
+        status_row.status = payload.status
+
+    db.commit()
+
+    return {"trip_id": trip_id, "status": status_row.status}
+
+
+@router.post("/{trip_id}/favorite", response_model=TripFavoriteOut)
+async def update_trip_favorite(trip_id: int, payload: TripFavoriteUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user_from_cookie)):
+    """Toggle or set favorite status for a trip."""
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    if trip.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to update this trip")
+
+    favorite_row = db.query(TripFavorite).filter(
+        TripFavorite.trip_id == trip_id,
+        TripFavorite.user_id == current_user.id
+    ).first()
+
+    if payload.is_favorite is None:
+        new_value = favorite_row is None
+    else:
+        new_value = payload.is_favorite
+
+    if new_value and favorite_row is None:
+        favorite_row = TripFavorite(trip_id=trip_id, user_id=current_user.id)
+        db.add(favorite_row)
+    elif not new_value and favorite_row is not None:
+        db.delete(favorite_row)
+
+    db.commit()
+
+    return {"trip_id": trip_id, "is_favorite": new_value}
 
 
 @router.post("/", response_model=TripOut, status_code=status.HTTP_201_CREATED)

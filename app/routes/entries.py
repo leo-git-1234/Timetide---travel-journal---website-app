@@ -12,7 +12,8 @@ from PIL.ExifTags import TAGS, GPSTAGS
 
 from app.models import get_db
 from app.models.database import Entry, Photo, Like, User, Location, Trip
-from app.core.security import decode_token
+from app.core.security import decode_token as decode_token_core
+from app.auth.jwt import decode_token as decode_token_legacy
 
 router = APIRouter()
 
@@ -232,7 +233,10 @@ class EntryCreate(BaseModel):
 class EntryUpdate(BaseModel):
     """Schema for updating an entry."""
     content: Optional[str] = Field(None, min_length=1)
+    entry_date: Optional[date] = None
     entry_time: Optional[str] = None
+    location: Optional[LocationCreate] = None
+    photos: Optional[List[PhotoCreate]] = None
 
 
 # Helper function to get current user from cookies
@@ -248,7 +252,9 @@ async def get_current_user_from_cookie(request: Request, db: Session = Depends(g
         )
     
     # Decode token
-    payload = decode_token(token)
+    payload = decode_token_core(token)
+    if not payload:
+        payload = decode_token_legacy(token)
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -257,6 +263,13 @@ async def get_current_user_from_cookie(request: Request, db: Session = Depends(g
     
     user_id = payload.get("sub")
     if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
@@ -407,10 +420,48 @@ async def update_entry(
     if entry.author_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not permitted to edit this entry")
     
+    fields_set = getattr(update_data, "model_fields_set", None)
+    if fields_set is None:
+        fields_set = update_data.__fields_set__
+
     if update_data.content is not None:
         entry.content = update_data.content
+    if update_data.entry_date is not None:
+        entry.entry_date = update_data.entry_date
     if update_data.entry_time is not None:
         entry.entry_time = update_data.entry_time
+
+    # Update location (allow clearing if explicitly provided as null)
+    if "location" in fields_set:
+        if update_data.location is None:
+            entry.location_id = None
+        else:
+            if entry.location:
+                entry.location.place_name = update_data.location.place_name
+                entry.location.latitude = update_data.location.latitude
+                entry.location.longitude = update_data.location.longitude
+            else:
+                location = Location(
+                    place_name=update_data.location.place_name,
+                    latitude=update_data.location.latitude,
+                    longitude=update_data.location.longitude
+                )
+                db.add(location)
+                db.flush()
+                entry.location_id = location.id
+
+    # Replace photos if provided (empty list clears all photos)
+    if "photos" in fields_set:
+        db.query(Photo).filter(Photo.entry_id == entry.id).delete()
+        if update_data.photos:
+            for photo_data in update_data.photos:
+                photo = Photo(
+                    entry_id=entry.id,
+                    url=photo_data.url,
+                    caption=photo_data.caption,
+                    order=photo_data.order
+                )
+                db.add(photo)
     
     db.commit()
     db.refresh(entry)

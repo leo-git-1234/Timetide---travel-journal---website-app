@@ -60,6 +60,61 @@
         height: fit-content;
     }
 
+    .trip-hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+
+    .trip-status-toggle {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        white-space: nowrap;
+    }
+
+    .trip-status-toggle.completed {
+        background: rgba(240, 248, 244, 0.4);
+        border-color: rgba(200, 230, 216, 0.7);
+        color: #dfeee6;
+    }
+
+    .trip-status-toggle.ongoing {
+        background: rgba(254, 249, 240, 0.4);
+        border-color: rgba(240, 217, 200, 0.7);
+        color: #f6ead7;
+    }
+
+    .trip-favorite-btn {
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.7);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .trip-favorite-btn.active {
+        color: #f5d27a;
+        border-color: rgba(245, 210, 122, 0.7);
+        background: rgba(255, 246, 218, 0.35);
+    }
+
     .edit-trip-btn:hover {
         background: rgba(255, 255, 255, 0.3);
         border-color: rgba(255, 255, 255, 0.6);
@@ -402,6 +457,64 @@
         border-color: var(--accent, #6E8C78);
     }
 
+    .entry-edit-field {
+        display: grid;
+        gap: 0.35rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .entry-edit-field label {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #6A655D);
+    }
+
+    .entry-edit-field input,
+    .entry-edit-field textarea {
+        width: 100%;
+    }
+
+    .entry-edit-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .entry-edit-photos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .entry-edit-photo {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border, #E0D8CF);
+        background: var(--bg-primary, #F7F4EF);
+    }
+
+    .entry-edit-photo img {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .entry-edit-photo button {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        border: none;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        font-size: 0.75rem;
+    }
+
     .entry-edit-actions {
         display: flex;
         gap: 0.5rem;
@@ -551,11 +664,62 @@
         margin-bottom: 2rem;
     }
 
+    .calendar-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .calendar-nav-btn {
+        background: var(--bg-primary, #F7F4EF);
+        border: 1px solid var(--border, #E0D8CF);
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.2rem;
+        color: var(--text-primary);
+    }
+
+    .calendar-nav-btn:hover:not(:disabled) {
+        background: var(--accent, #6E8C78);
+        color: white;
+        border-color: var(--accent, #6E8C78);
+    }
+
+    .calendar-nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
     .calendar-header {
         font-family: var(--font-serif);
-        font-size: 1.3rem;
-        margin: 0 0 1.5rem 0;
+        font-size: 1.1rem;
+        margin: 0;
         color: var(--text-primary);
+        flex: 1;
+        text-align: center;
+    }
+
+    .calendar-grid-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .calendar-day-header {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding: 0.5rem 0;
     }
 
     .calendar-days {
@@ -570,20 +734,32 @@
         align-items: center;
         justify-content: center;
         border-radius: 8px;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.2s ease;
         background: var(--bg-primary, #F7F4EF);
         border: 1px solid transparent;
+        color: var(--text-primary);
+        position: relative;
+    }
+
+    .calendar-day.other-month {
+        opacity: 0.3;
+        cursor: default;
     }
 
     .calendar-day.has-entry {
-        background: var(--accent, #6E8C78);
-        color: white;
+        background: #FFD700;
+        color: var(--text-primary);
         font-weight: 600;
     }
 
-    .calendar-day:hover {
+    .calendar-day.has-entry:hover {
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+    }
+
+    .calendar-day:hover:not(.other-month) {
         border-color: var(--accent, #6E8C78);
     }
 
@@ -604,17 +780,50 @@
         font-family: var(--font-serif);
         font-size: 1.3rem;
         margin: 0;
-        padding: 2rem 2rem 1rem;
+        padding: 1.25rem 1.75rem 0.75rem;
         color: var(--text-primary);
     }
 
     #trip-map {
-        height: 400px;
+        height: 420px;
         width: 100%;
-        min-height: 400px;
+        min-height: 420px;
         position: relative;
         z-index: 1;
-        background: #f0f0f0;
+        background: rgba(240, 240, 240, 0.55);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .map-widget {
+        background: rgba(253, 251, 247, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .map-widget .leaflet-tile {
+        opacity: 0.7;
+    }
+
+    .map-widget .leaflet-marker-icon,
+    .map-widget .leaflet-marker-shadow,
+    .map-widget .leaflet-popup,
+    .map-widget .leaflet-overlay-pane path {
+        opacity: 1;
+    }
+
+    .map-empty {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6f6a63;
+        font-size: 0.95rem;
+        text-align: center;
+        padding: 1rem;
+        background: rgba(253, 251, 247, 0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
     }
 
     /* Timeline Card */
@@ -975,8 +1184,8 @@
 
     <!-- Error State -->
     <div id="errorState" style="display: none; text-align: center; padding: 4rem;">
-        <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Trip not found</h2>
-        <p style="color: var(--text-secondary);">This trip may have been deleted or you don't have access to it.</p>
+        <h2 id="errorTitle" style="color: var(--text-primary); margin-bottom: 1rem;">Trip not found</h2>
+        <p id="errorMessage" style="color: var(--text-secondary);">This trip may have been deleted or you don't have access to it.</p>
         <a href="/dashboard" style="display: inline-block; margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: var(--accent); color: white; text-decoration: none; border-radius: 8px;">Return to Dashboard</a>
     </div>
 
@@ -1000,21 +1209,12 @@
                             </div>
                         </div>
                     </div>
-                    <button id="editTripBtn" class="edit-trip-btn" onclick="openEditTripModal()">✏️ Edit</button>
+                    <div class="trip-hero-actions">
+                        <button id="tripStatusToggle" class="trip-status-toggle">Status</button>
+                        <button id="tripFavoriteBtn" class="trip-favorite-btn" aria-label="Toggle favorite">★</button>
+                        <button id="editTripBtn" class="edit-trip-btn" onclick="openEditTripModal()">✏️ Edit</button>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Trip Timeline Node Component -->
-        <div class="trip-timeline-container" id="tripTimelineContainer" style="display: none;">
-            <div class="trip-timeline-header">
-                <button class="trip-timeline-nav-btn" id="tripTimelinePrevMonth" onclick="navigateTripTimelineMonth(-1)">←</button>
-                <div class="trip-timeline-month-year" id="tripTimelineMonthYear">Loading...</div>
-                <button class="trip-timeline-nav-btn" id="tripTimelineNextMonth" onclick="navigateTripTimelineMonth(1)">→</button>
-            </div>
-            <div class="trip-timeline-wrapper">
-                <div class="trip-timeline-line" aria-hidden="true"></div>
-                <div class="trip-timeline-nodes" id="tripTimelineNodes"></div>
             </div>
         </div>
 
@@ -1059,7 +1259,21 @@
 
                 <!-- Calendar Widget -->
                 <div class="calendar-widget">
-                    <h3 class="calendar-header">Calendar</h3>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" id="calPrevBtn" onclick="tripCalendarPrevMonth()">‹</button>
+                        <h3 class="calendar-header" id="calMonthYear">Month Year</h3>
+                        <button class="calendar-nav-btn" id="calNextBtn" onclick="tripCalendarNextMonth()">›</button>
+                    </div>
+                    <!-- Day headers -->
+                    <div class="calendar-grid-header">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
+                    </div>
                     <div id="calendarDays" class="calendar-days"></div>
                 </div>
 
@@ -1154,72 +1368,177 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const tripId = document.getElementById('tripMeta').dataset.tripId;
+    const tripIdRaw = document.getElementById('tripMeta').dataset.tripId;
+    const tripId = parseInt(tripIdRaw, 10);
     let tripData = null;
     let map = null;
+    const openEditOnLoad = new URLSearchParams(window.location.search).get('edit') === '1';
+
+    function getEl(id) {
+        return document.getElementById(id);
+    }
+
+    function setDisplay(id, value) {
+        const el = getEl(id);
+        if (el) {
+            el.style.display = value;
+        }
+    }
 
     // Load trip data
     async function loadTrip() {
         try {
+            if (!Number.isFinite(tripId)) {
+                throw { status: 400, message: 'Invalid trip id.' };
+            }
             const response = await fetch(`/trips/${tripId}`, {
                 credentials: 'include'
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load trip');
+                let message = 'Failed to load trip.';
+                try {
+                    const errorData = await response.json();
+                    message = errorData.detail || errorData.message || message;
+                } catch (e) {
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) message = errorText;
+                    } catch (textErr) {
+                        // ignore
+                    }
+                }
+                throw { status: response.status, message: `Error ${response.status}: ${message}` };
             }
 
             tripData = await response.json();
+            if (!tripData.statistics) {
+                tripData.statistics = {
+                    num_days: 0,
+                    num_entries: 0,
+                    num_photos: 0,
+                    num_locations: 0
+                };
+            }
+            if (!Array.isArray(tripData.entries)) tripData.entries = [];
+            if (!Array.isArray(tripData.contributors)) tripData.contributors = [];
             window.tripData = tripData; // Store globally for modal access
             renderTrip(tripData);
+            if (openEditOnLoad) {
+                openEditTripModal();
+            }
         } catch (error) {
             console.error('Error loading trip:', error);
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
+            setDisplay('loadingState', 'none');
+            setDisplay('errorState', 'block');
+            const errorTitle = document.getElementById('errorTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            const status = error?.status;
+            if (status === 401) {
+                if (errorTitle) errorTitle.textContent = 'Please sign in';
+                if (errorMessage) errorMessage.textContent = 'Your session expired. Please sign in again.';
+            } else if (status === 403) {
+                if (errorTitle) errorTitle.textContent = 'Access denied';
+                if (errorMessage) errorMessage.textContent = 'You do not have permission to access this trip.';
+            } else if (status === 404) {
+                if (errorTitle) errorTitle.textContent = 'Trip not found';
+                if (errorMessage) errorMessage.textContent = 'This trip may have been deleted or you do not have access to it.';
+            } else if (status === 400) {
+                if (errorTitle) errorTitle.textContent = 'Invalid trip';
+                if (errorMessage) errorMessage.textContent = error?.message || 'Invalid trip id.';
+            } else {
+                if (errorTitle) errorTitle.textContent = 'Unable to load trip';
+                if (errorMessage) errorMessage.textContent = error?.message || 'An unexpected error occurred.';
+            }
         }
     }
 
     // Render trip data
     function renderTrip(trip) {
-        document.getElementById('loadingState').style.display = 'none';
-        document.getElementById('tripContent').style.display = 'block';
+        console.log('renderTrip called with:', trip);
+        setDisplay('loadingState', 'none');
+        setDisplay('tripContent', 'block');
 
         // Hero section
-        document.getElementById('tripTitle').textContent = trip.title;
-        document.getElementById('tripLocation').textContent = trip.location;
-        document.getElementById('tripDates').textContent = formatDateRange(trip.start_date, trip.end_date);
+        const titleEl = getEl('tripTitle');
+        const locationEl = getEl('tripLocation');
+        const datesEl = getEl('tripDates');
+        const coverImg = getEl('tripCover');
         
-        const coverImg = document.getElementById('tripCover');
-        coverImg.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
+        if (titleEl) titleEl.textContent = trip.title;
+        if (locationEl) locationEl.textContent = trip.location;
+        if (datesEl) datesEl.textContent = formatDateRange(trip.start_date, trip.end_date);
+        if (coverImg) coverImg.src = trip.cover_image || '/static/images/placeholder-trip.jpg';
 
         // Statistics
-        document.getElementById('statDays').textContent = trip.statistics.num_days;
-        document.getElementById('statEntries').textContent = trip.statistics.num_entries;
-        document.getElementById('statPhotos').textContent = trip.statistics.num_photos;
-        document.getElementById('statLocations').textContent = trip.statistics.num_locations;
+        const statDays = getEl('statDays');
+        const statEntries = getEl('statEntries');
+        const statPhotos = getEl('statPhotos');
+        const statLocations = getEl('statLocations');
+        
+        if (statDays) statDays.textContent = trip.statistics.num_days;
+        if (statEntries) statEntries.textContent = trip.statistics.num_entries;
+        if (statPhotos) statPhotos.textContent = trip.statistics.num_photos;
+        if (statLocations) statLocations.textContent = trip.statistics.num_locations;
+
+        const statusButton = getEl('tripStatusToggle');
+        const favoriteButton = getEl('tripFavoriteBtn');
+        const fallbackStatus = new Date(trip.end_date) < new Date() ? 'completed' : 'ongoing';
+        const statusValue = trip.status || fallbackStatus;
+        
+        if (statusButton) {
+            statusButton.textContent = statusValue;
+            statusButton.classList.remove('completed', 'ongoing');
+            statusButton.classList.add(statusValue);
+            statusButton.onclick = async () => {
+                const newStatus = statusValue === 'completed' ? 'ongoing' : 'completed';
+                await updateTripStatus(trip.id, newStatus);
+            };
+        }
+
+        if (favoriteButton) {
+            favoriteButton.classList.toggle('active', !!trip.is_favorite);
+            favoriteButton.onclick = async () => {
+                await updateTripFavorite(trip.id, !trip.is_favorite);
+            };
+        }
 
         // Calendar
+        console.log('Rendering calendar...');
         renderCalendar(trip);
 
         // Entries
+        console.log('Trip has', trip.entries?.length || 0, 'entries');
         if (trip.entries && trip.entries.length > 0) {
+            console.log('Rendering entries...');
             renderEntries(trip.entries);
+            console.log('Rendering trip timeline...');
             renderTripTimeline(trip.entries);
+            console.log('Rendering map...');
             renderMap(trip.entries);
+            console.log('Rendering timeline...');
             renderTimeline(trip.entries);
         } else {
-            document.getElementById('emptyEntries').style.display = 'block';
+            setDisplay('emptyEntries', 'block');
         }
 
         // Contributors
+        console.log('Trip has', trip.contributors?.length || 0, 'contributors');
         if (trip.contributors && trip.contributors.length > 0) {
+            console.log('Rendering contributors...');
             renderContributors(trip.contributors, trip.entries);
         }
+        
+        console.log('renderTrip complete');
     }
 
     // Render entries grouped by date
     function renderEntries(entries) {
-        const container = document.getElementById('entriesContainer');
+        const container = getEl('entriesContainer');
+        if (!container) {
+            console.warn('entriesContainer not found');
+            return;
+        }
         container.innerHTML = '';
 
         // Group entries by date
@@ -1281,7 +1600,18 @@
         
         const avatar = document.createElement('div');
         avatar.className = 'entry-author-avatar';
-        avatar.textContent = entry.author.name.charAt(0).toUpperCase();
+        if (entry.author && entry.author.avatar_url) {
+            const img = document.createElement('img');
+            img.src = entry.author.avatar_url;
+            img.alt = entry.author.name || 'Author';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            avatar.appendChild(img);
+        } else {
+            avatar.textContent = entry.author.name.charAt(0).toUpperCase();
+        }
         
         const name = document.createElement('span');
         name.className = 'entry-author-name';
@@ -1334,80 +1664,106 @@
     }
 
     // Render calendar
-    function renderCalendar(trip) {
-        const container = document.getElementById('calendarDays');
-        const startDate = new Date(trip.start_date);
-        const endDate = new Date(trip.end_date);
-        const today = new Date();
-        
-        // Get entry dates
-        const entryDates = new Set(trip.entries.map(e => e.entry_date));
+    // Calendar navigation state
+    let tripCalendarCurrentDate = new Date();
 
-        // Calculate days to show
-        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
-        for (let i = 0; i < totalDays; i++) {
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + i);
-            
+    function renderCalendar(trip) {
+        // Initialize calendar to trip start date
+        tripCalendarCurrentDate = new Date(trip.start_date);
+        tripCalendarRender();
+    }
+
+    function tripCalendarRender() {
+        const container = getEl('calendarDays');
+        if (!container) {
+            console.warn('calendarDays not found');
+            return;
+        }
+
+        const monthYearEl = getEl('calMonthYear');
+        const prevBtn = getEl('calPrevBtn');
+        const nextBtn = getEl('calNextBtn');
+
+        const currentDate = new Date(tripCalendarCurrentDate);
+        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+        const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const startWeekday = startOfMonth.getDay(); // 0 = Sunday
+        const daysInMonth = endOfMonth.getDate();
+
+        // Update header
+        monthYearEl.textContent = currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+        // Get trip dates
+        const tripStart = new Date(window.tripData.start_date);
+        const tripEnd = new Date(window.tripData.end_date);
+        const entryDates = new Set(window.tripData.entries.map(e => e.entry_date));
+
+        // Check if we can navigate
+        const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+        prevBtn.disabled = prevMonth < tripStart;
+        nextBtn.disabled = nextMonth > tripEnd;
+
+        container.innerHTML = '';
+
+        // Add padding for days before month starts
+        for (let i = 0; i < startWeekday; i++) {
             const day = document.createElement('div');
-            day.className = 'calendar-day';
-            day.textContent = currentDate.getDate();
-            
-            const dateStr = currentDate.toISOString().split('T')[0];
-            if (entryDates.has(dateStr)) {
-                day.classList.add('has-entry');
-                day.onclick = () => scrollToDay(dateStr);
-            }
-            
-            if (isSameDay(currentDate, today)) {
-                day.classList.add('today');
-            }
-            
+            day.className = 'calendar-day other-month';
             container.appendChild(day);
         }
-    }
 
-    // Render timeline
-    function renderTimeline(entries) {
-        if (!entries || entries.length === 0) return;
-        
-        document.getElementById('timelineCard').style.display = 'block';
-        const container = document.getElementById('timelineItems');
-        
-        const sortedEntries = [...entries].sort((a, b) => 
-            new Date(a.entry_date) - new Date(b.entry_date)
-        );
-        
-        container.innerHTML = sortedEntries.map(entry => `
-            <div class="timeline-item" onclick="scrollToEntry('${entry.id}')">
-                <div class="timeline-date">${formatDateShort(entry.entry_date)}</div>
-                <div class="timeline-content">
-                    <div class="timeline-title">${entry.entry_time || 'No time'}</div>
-                    <div class="timeline-location">${entry.location?.place_name || 'No location'}</div>
-                </div>
-            </div>
-        `).join('');
-    }
+        // Add days of month
+        const today = new Date();
+        for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+            const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNum);
+            
+            // Create dateStr in local timezone (YYYY-MM-DD format)
+            const year = dayDate.getFullYear();
+            const month = String(dayDate.getMonth() + 1).padStart(2, '0');
+            const day = String(dayDate.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
 
-    function formatDateShort(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            dayEl.setAttribute('data-date', dateStr);
+            dayEl.textContent = dayNum;
 
-    function scrollToEntry(entryId) {
-        const element = document.querySelector(`[data-entry-id="${entryId}"]`);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const hasEntry = entryDates.has(dateStr);
+            if (hasEntry) {
+                dayEl.classList.add('has-entry');
+                dayEl.onclick = () => scrollToDay(dateStr);
+            }
+
+            const isToday = dayDate.toDateString() === today.toDateString();
+            if (isToday) {
+                dayEl.classList.add('today');
+            }
+
+            container.appendChild(dayEl);
         }
     }
 
+    function tripCalendarPrevMonth() {
+        tripCalendarCurrentDate.setMonth(tripCalendarCurrentDate.getMonth() - 1);
+        tripCalendarRender();
+    }
+
+    function tripCalendarNextMonth() {
+        tripCalendarCurrentDate.setMonth(tripCalendarCurrentDate.getMonth() + 1);
+        tripCalendarRender();
+    }
+
     // Render timeline
     function renderTimeline(entries) {
         if (!entries || entries.length === 0) return;
         
-        document.getElementById('timelineCard').style.display = 'block';
-        const container = document.getElementById('timelineItems');
+        setDisplay('timelineCard', 'block');
+        const container = getEl('timelineItems');
+        if (!container) {
+            console.warn('timelineItems not found');
+            return;
+        }
         
         const sortedEntries = [...entries].sort((a, b) => 
             new Date(a.entry_date) - new Date(b.entry_date)
@@ -1445,9 +1801,6 @@
     function renderTripTimeline(entries) {
         if (!entries || entries.length === 0) return;
         
-        const timelineContainer = document.getElementById('tripTimelineContainer');
-        const timelineNodes = document.getElementById('tripTimelineNodes');
-        
         // Store all entries
         tripTimelineAllEntries = [...entries].sort((a, b) => 
             new Date(a.entry_date) - new Date(b.entry_date)
@@ -1472,6 +1825,10 @@
             tripTimelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
         }
 
+        const timelineContainer = getEl('timelineCard');
+        if (!timelineContainer) {
+            return;
+        }
         timelineContainer.style.display = 'flex';
         updateTripTimelineDisplay();
     }
@@ -1482,16 +1839,24 @@
         
         // Update month/year display
         const monthYearDisplay = tripTimelineCurrentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        document.getElementById('tripTimelineMonthYear').textContent = monthYearDisplay;
+        const monthYearEl = getEl('tripTimelineMonthYear');
+        if (monthYearEl) {
+            monthYearEl.textContent = monthYearDisplay;
+        }
 
         // Update navigation buttons
         const monthKeys = Object.keys(tripTimelineMonthlyEntries).sort();
         const currentIndex = monthKeys.indexOf(monthKey);
-        document.getElementById('tripTimelinePrevMonth').disabled = currentIndex <= 0;
-        document.getElementById('tripTimelineNextMonth').disabled = currentIndex >= monthKeys.length - 1;
+        const prevBtn = getEl('tripTimelinePrevMonth');
+        const nextBtn = getEl('tripTimelineNextMonth');
+        if (prevBtn) prevBtn.disabled = currentIndex <= 0;
+        if (nextBtn) nextBtn.disabled = currentIndex >= monthKeys.length - 1;
 
         // Render nodes
-        const timelineNodes = document.getElementById('tripTimelineNodes');
+        const timelineNodes = getEl('tripTimelineNodes');
+        if (!timelineNodes) {
+            return;
+        }
         timelineNodes.innerHTML = '';
 
         if (monthEntries.length === 0) {
@@ -1561,22 +1926,33 @@
 
     // Render map - SIMPLIFIED VERSION
     function renderMap(entries) {
+        // Show the map widget
+        const mapWidget = getEl('mapWidget');
+        if (!mapWidget) {
+            return;
+        }
+        mapWidget.style.display = 'block';
+
+        // Get container
+        const container = getEl('trip-map');
+        if (!container) {
+            return;
+        }
+
         const locations = entries.filter(e => e.location && e.location.latitude && e.location.longitude);
         
         if (locations.length === 0) {
             console.log('No locations for map');
+            container.innerHTML = '<div class="map-empty">Add an entry with a location to see your journey map.</div>';
+            container.style.height = '420px';
+            container.style.width = '100%';
+            container.style.position = 'relative';
             return;
         }
 
         console.log('===== STARTING MAP RENDER =====' );
         console.log('Locations:', locations.length);
         
-        // Show the map widget
-        const mapWidget = document.getElementById('mapWidget');
-        mapWidget.style.display = 'block';
-        
-        // Get container
-        const container = document.getElementById('trip-map');
         console.log('Container before:', container.offsetWidth, 'x', container.offsetHeight);
         
         // Remove any existing map
@@ -1588,7 +1964,7 @@
         
         // Clear and reset container
         container.innerHTML = '';
-        container.style.height = '400px';
+        container.style.height = '420px';
         container.style.width = '100%';
         container.style.position = 'relative';
         
@@ -1641,6 +2017,20 @@
                 bounds.push([lat, lng]);
             });
 
+            // Create polyline connecting entries in sequence
+            if (locations.length > 1) {
+                const polylinePoints = locations.map(entry => [
+                    parseFloat(entry.location.latitude),
+                    parseFloat(entry.location.longitude)
+                ]);
+                L.polyline(polylinePoints, {
+                    color: '#3388ff',
+                    weight: 3,
+                    opacity: 0.8,
+                    smoothFactor: 1
+                }).addTo(window.tripMap);
+            }
+
             // Fit bounds if multiple locations
             if (bounds.length > 1) {
                 console.log('Fitting bounds');
@@ -1661,10 +2051,48 @@
         }
     }
 
+    async function updateTripStatus(tripId, statusValue) {
+        try {
+            const response = await fetch(`/trips/${tripId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ status: statusValue })
+            });
+            if (response.ok) {
+                tripData.status = statusValue;
+                renderTrip(tripData);
+            }
+        } catch (error) {
+            console.error('Failed to update status', error);
+        }
+    }
+
+    async function updateTripFavorite(tripId, isFavorite) {
+        try {
+            const response = await fetch(`/trips/${tripId}/favorite`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ is_favorite: isFavorite })
+            });
+            if (response.ok) {
+                tripData.is_favorite = isFavorite;
+                renderTrip(tripData);
+            }
+        } catch (error) {
+            console.error('Failed to update favorite', error);
+        }
+    }
+
     // Render contributors
     function renderContributors(contributors, entries) {
-        document.getElementById('activityPanel').style.display = 'block';
-        const container = document.getElementById('contributorsList');
+        setDisplay('activityPanel', 'block');
+        const container = getEl('contributorsList');
+        if (!container) {
+            console.warn('contributorsList not found');
+            return;
+        }
         
         contributors.forEach(contributor => {
             const count = entries.filter(e => e.author.id === contributor.id).length;
@@ -1674,7 +2102,18 @@
             
             const avatar = document.createElement('div');
             avatar.className = 'contributor-avatar';
-            avatar.textContent = contributor.name.charAt(0).toUpperCase();
+            if (contributor.avatar_url) {
+                const img = document.createElement('img');
+                img.src = contributor.avatar_url;
+                img.alt = contributor.name || 'Contributor';
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                avatar.appendChild(img);
+            } else {
+                avatar.textContent = contributor.name.charAt(0).toUpperCase();
+            }
             
             const info = document.createElement('div');
             info.className = 'contributor-info';
@@ -1760,6 +2199,8 @@
         modal.style.display = 'block';
     }
 
+    const entryEditState = {};
+
     function populateEntriesEditList(entries) {
         const container = document.getElementById('entriesEditList');
         container.innerHTML = '';
@@ -1770,6 +2211,19 @@
         }
         
         entries.forEach(entry => {
+            entryEditState[entry.id] = {
+                photos: (entry.photos || []).map((photo, index) => ({
+                    url: photo.url,
+                    caption: photo.caption || null,
+                    order: typeof photo.order === 'number' ? photo.order : index
+                })),
+                location: entry.location ? {
+                    place_name: entry.location.place_name || '',
+                    latitude: entry.location.latitude || null,
+                    longitude: entry.location.longitude || null
+                } : null
+            };
+
             const entryDiv = document.createElement('div');
             entryDiv.className = 'entry-edit-item';
             entryDiv.innerHTML = `
@@ -1782,7 +2236,29 @@
                 </div>
                 <div class="entry-edit-content-preview">${entry.content.substring(0, 100)}${entry.content.length > 100 ? '...' : ''}</div>
                 <div class="entry-edit-form">
-                    <textarea id="entryContent_${entry.id}" rows="4" placeholder="Entry content">${entry.content}</textarea>
+                    <div class="entry-edit-row">
+                        <div class="entry-edit-field">
+                            <label>Date</label>
+                            <input type="date" id="entryDate_${entry.id}" value="${entry.entry_date}">
+                        </div>
+                        <div class="entry-edit-field">
+                            <label>Time</label>
+                            <input type="time" id="entryTime_${entry.id}" value="${entry.entry_time || ''}">
+                        </div>
+                    </div>
+                    <div class="entry-edit-field">
+                        <label>Location</label>
+                        <input type="text" id="entryLocation_${entry.id}" value="${entry.location?.place_name || ''}" placeholder="Location">
+                    </div>
+                    <div class="entry-edit-field">
+                        <label>Content</label>
+                        <textarea id="entryContent_${entry.id}" rows="4" placeholder="Entry content">${entry.content}</textarea>
+                    </div>
+                    <div class="entry-edit-field">
+                        <label>Photos</label>
+                        <div id="entryPhotos_${entry.id}" class="entry-edit-photos"></div>
+                        <input type="file" id="entryPhotoInput_${entry.id}" accept="image/*" multiple onchange="handleEntryPhotoAdd(${entry.id})">
+                    </div>
                     <div class="entry-edit-actions">
                         <button class="entry-save-btn" onclick="saveEntry(${entry.id})">Save</button>
                         <button class="entry-delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
@@ -1790,7 +2266,44 @@
                 </div>
             `;
             container.appendChild(entryDiv);
+            renderEntryEditPhotos(entry.id);
         });
+    }
+
+    function renderEntryEditPhotos(entryId) {
+        const container = document.getElementById(`entryPhotos_${entryId}`);
+        if (!container) return;
+        const photos = entryEditState[entryId]?.photos || [];
+        container.innerHTML = photos.map((photo, index) => `
+            <div class="entry-edit-photo">
+                <img src="${photo.url}" alt="Entry photo">
+                <button type="button" onclick="removeEntryPhoto(${entryId}, ${index})">×</button>
+            </div>
+        `).join('');
+    }
+
+    async function handleEntryPhotoAdd(entryId) {
+        const input = document.getElementById(`entryPhotoInput_${entryId}`);
+        if (!input || !input.files.length) return;
+        const files = Array.from(input.files);
+        for (const file of files) {
+            const base64 = await fileToBase64(file);
+            entryEditState[entryId].photos.push({
+                url: base64,
+                caption: null,
+                order: entryEditState[entryId].photos.length
+            });
+        }
+        input.value = '';
+        renderEntryEditPhotos(entryId);
+    }
+
+    function removeEntryPhoto(entryId, index) {
+        entryEditState[entryId].photos.splice(index, 1);
+        entryEditState[entryId].photos.forEach((photo, i) => {
+            photo.order = i;
+        });
+        renderEntryEditPhotos(entryId);
     }
 
     function toggleEntryEditForm(headerElement) {
@@ -1803,18 +2316,36 @@
     async function saveEntry(entryId) {
         try {
             const content = document.getElementById(`entryContent_${entryId}`).value.trim();
+            const entryDate = document.getElementById(`entryDate_${entryId}`).value;
+            const entryTime = document.getElementById(`entryTime_${entryId}`).value;
+            const locationName = document.getElementById(`entryLocation_${entryId}`).value.trim();
             
             if (!content) {
                 alert('Entry content cannot be empty');
                 return;
             }
+
+            const location = locationName
+                ? {
+                    place_name: locationName,
+                    latitude: entryEditState[entryId].location?.latitude || null,
+                    longitude: entryEditState[entryId].location?.longitude || null
+                }
+                : null;
             
-            const response = await fetch(`/api/entries/${entryId}`, {
+            const response = await fetch(`/entries/${entryId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ content })
+                credentials: 'include',
+                body: JSON.stringify({
+                    content,
+                    entry_date: entryDate || null,
+                    entry_time: entryTime || null,
+                    location,
+                    photos: entryEditState[entryId].photos
+                })
             });
             
             if (!response.ok) {
@@ -1838,8 +2369,9 @@
         }
         
         try {
-            const response = await fetch(`/api/entries/${entryId}`, {
-                method: 'DELETE'
+            const response = await fetch(`/entries/${entryId}`, {
+                method: 'DELETE',
+                credentials: 'include'
             });
             
             if (!response.ok) {
@@ -1858,7 +2390,7 @@
     }
 
     function closeEditTripModal() {
-        document.getElementById('editTripModal').style.display = 'none';
+        setDisplay('editTripModal', 'none');
     }
 
     async function saveTrip() {
@@ -1913,11 +2445,12 @@
             saveBtn.disabled = true;
             saveBtn.textContent = 'Saving...';
 
-            const response = await fetch(`/api/trips/${tripId}`, {
+            const response = await fetch(`/trips/${tripId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify(updateData)
             });
 

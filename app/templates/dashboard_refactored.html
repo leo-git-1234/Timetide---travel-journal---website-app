@@ -537,6 +537,105 @@
         padding: 0 1.25rem 1.25rem;
     }
 
+    .trip-card-actions-left {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .trip-card-status-toggle {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 999px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    .trip-card-status-toggle.completed {
+        background: #f0f8f4;
+        border-color: #c8e6d8;
+        color: #4a7d68;
+    }
+
+    .trip-card-status-toggle.ongoing {
+        background: #fef9f0;
+        border-color: #f0d9c8;
+        color: #9d6b3d;
+    }
+
+    .trip-card-favorite-btn {
+        border: 1px solid var(--border);
+        background: white;
+        color: #c2b8ad;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+
+    .trip-card-favorite-btn.active {
+        color: #d1a73a;
+        border-color: #e6d39c;
+        background: #fff6da;
+    }
+
+    .primary-trip-status {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: capitalize;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+    }
+
+    .primary-trip-status.completed {
+        background: #f0f8f4;
+        border-color: #c8e6d8;
+        color: #4a7d68;
+    }
+
+    .primary-trip-status.ongoing {
+        background: #fef9f0;
+        border-color: #f0d9c8;
+        color: #9d6b3d;
+    }
+
+    .primary-trip-favorite {
+        border: 1px solid var(--border);
+        background: white;
+        color: #c2b8ad;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+    .primary-trip-favorite.active {
+        color: #d1a73a;
+        border-color: #e6d39c;
+        background: #fff6da;
+    }
+
     .trip-card-btn {
         border: none;
         background: transparent;
@@ -1086,7 +1185,10 @@
                     <div class="primary-trip-header">
                         <div class="primary-trip-title-row">
                             <h2 id="primaryTripTitle" class="primary-trip-title"></h2>
-                            <span class="primary-trip-badge">✔ Archived</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <button id="primaryTripStatus" class="primary-trip-status">Status</button>
+                                <button id="primaryTripFavorite" class="primary-trip-favorite" aria-label="Toggle favorite">★</button>
+                            </div>
                         </div>
                         <div id="primaryTripDates" class="primary-trip-date"></div>
                         <p id="primaryTripDescription" class="primary-trip-description"></p>
@@ -1201,6 +1303,23 @@
         desc.textContent = trip.description || 'A journey preserved in time';
         desc.style.display = trip.description ? 'block' : 'none';
 
+        const statusButton = document.getElementById('primaryTripStatus');
+        const favoriteButton = document.getElementById('primaryTripFavorite');
+        const fallbackStatus = new Date(trip.end_date) < new Date() ? 'completed' : 'ongoing';
+        const statusValue = trip.status || fallbackStatus;
+        statusButton.textContent = statusValue;
+        statusButton.classList.remove('completed', 'ongoing');
+        statusButton.classList.add(statusValue);
+        statusButton.onclick = async () => {
+            const newStatus = statusValue === 'completed' ? 'ongoing' : 'completed';
+            await updateTripStatus(trip.id, newStatus);
+        };
+
+        favoriteButton.classList.toggle('active', !!trip.is_favorite);
+        favoriteButton.onclick = async () => {
+            await updateTripFavorite(trip.id, !trip.is_favorite);
+        };
+
 
         // Metadata tags
         const statsContainer = document.getElementById('primaryTripStats');
@@ -1240,14 +1359,18 @@
     function createTripCard(trip) {
         const article = document.createElement('article');
         article.className = 'trip-card';
+        article.dataset.tripId = trip.id;
         
         // Create inner wrapper so card click doesn't trigger on button clicks
         const cardClickable = document.createElement('div');
         cardClickable.style.cursor = 'pointer';
         cardClickable.onclick = (e) => {
-            // Don't navigate if clicking buttons
-            if (!e.target.closest('button')) {
-                window.location.href = `/trip/${trip.id}`;
+            if (e.target.closest('button') || e.target.closest('.trip-card-map')) {
+                return;
+            }
+            const tripId = article.dataset.tripId;
+            if (tripId) {
+                window.location.href = `/trip/${tripId}`;
             }
         };
 
@@ -1311,12 +1434,50 @@
         const actions = document.createElement('div');
         actions.className = 'trip-card-actions';
 
+        const actionsLeft = document.createElement('div');
+        actionsLeft.className = 'trip-card-actions-left';
+
+        const now = new Date();
+        const endDateForStatus = new Date(trip.end_date);
+        const fallbackStatus = endDateForStatus < now ? 'completed' : 'ongoing';
+        const statusValue = trip.status || fallbackStatus;
+
+        const statusBtn = document.createElement('button');
+        statusBtn.className = `trip-card-status-toggle ${statusValue}`;
+        statusBtn.textContent = statusValue;
+        statusBtn.onclick = async (e) => {
+            e.stopPropagation();
+            const newStatus = statusValue === 'completed' ? 'ongoing' : 'completed';
+            const tripId = article.dataset.tripId;
+            if (tripId) {
+                await updateTripStatus(parseInt(tripId, 10), newStatus);
+            }
+        };
+        actionsLeft.appendChild(statusBtn);
+
+        const favoriteBtn = document.createElement('button');
+        favoriteBtn.className = `trip-card-favorite-btn ${trip.is_favorite ? 'active' : ''}`;
+        favoriteBtn.textContent = '★';
+        favoriteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            const tripId = article.dataset.tripId;
+            if (tripId) {
+                await updateTripFavorite(parseInt(tripId, 10), !trip.is_favorite);
+            }
+        };
+        actionsLeft.appendChild(favoriteBtn);
+
+        actions.appendChild(actionsLeft);
+
         const editBtn = document.createElement('button');
         editBtn.className = 'trip-card-btn';
         editBtn.textContent = 'Edit';
         editBtn.onclick = (e) => {
             e.stopPropagation();
-            window.location.href = `/trip/${trip.id}/edit`;
+            const tripId = article.dataset.tripId;
+            if (tripId) {
+                window.location.href = `/trip/${tripId}?edit=1`;
+            }
         };
         actions.appendChild(editBtn);
 
@@ -1325,8 +1486,9 @@
         deleteBtn.textContent = 'Delete';
         deleteBtn.onclick = async (e) => {
             e.stopPropagation();
-            if (confirm(`Are you sure you want to delete "${trip.title}"? This cannot be undone.`)) {
-                await deleteTrip(trip.id);
+            const tripId = article.dataset.tripId;
+            if (tripId && confirm(`Are you sure you want to delete "${trip.title}"? This cannot be undone.`)) {
+                await deleteTrip(parseInt(tripId, 10));
             }
         };
         actions.appendChild(deleteBtn);
@@ -1336,12 +1498,55 @@
         openBtn.textContent = 'Open Journey →';
         openBtn.onclick = (e) => {
             e.stopPropagation();
-            window.location.href = `/trip/${trip.id}`;
+            const tripId = article.dataset.tripId;
+            if (tripId) {
+                window.location.href = `/trip/${tripId}`;
+            }
         };
         actions.appendChild(openBtn);
 
         article.appendChild(actions);
         return article;
+    }
+
+    async function updateTripStatus(tripId, statusValue) {
+        try {
+            const response = await fetch(`/trips/${tripId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ status: statusValue })
+            });
+            if (response.ok) {
+                const trip = allTrips.find(t => t.id === tripId);
+                if (trip) trip.status = statusValue;
+                if (primaryTrip && primaryTrip.id === tripId) primaryTrip.status = statusValue;
+                renderPrimaryTrip(primaryTrip);
+                renderTripsGrid(allTrips);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
+    }
+
+    async function updateTripFavorite(tripId, isFavorite) {
+        try {
+            const response = await fetch(`/trips/${tripId}/favorite`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ is_favorite: isFavorite })
+            });
+            if (response.ok) {
+                const trip = allTrips.find(t => t.id === tripId);
+                if (trip) trip.is_favorite = isFavorite;
+                if (primaryTrip && primaryTrip.id === tripId) primaryTrip.is_favorite = isFavorite;
+                renderPrimaryTrip(primaryTrip);
+                renderTripsGrid(allTrips);
+            }
+        } catch (error) {
+            console.error('Error updating favorite:', error);
+        }
     }
 
     // View trip detail
@@ -1361,7 +1566,7 @@
     // Edit primary trip
     function editPrimaryTrip() {
         if (primaryTrip) {
-            window.location.href = `/trip/${primaryTrip.id}/edit`;
+            window.location.href = `/trip/${primaryTrip.id}?edit=1`;
         }
     }
 
