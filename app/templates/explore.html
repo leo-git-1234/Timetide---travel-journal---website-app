@@ -9,12 +9,32 @@
         height: calc(100vh - 70px);
         display: flex;
         flex-direction: column;
+        padding: 1.5rem 1rem 2rem;
+    }
+
+    .explore-map-card {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 190px);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        background: var(--surface);
     }
 
     .explore-header {
-        padding: 2rem;
-        background: var(--surface);
-        border-bottom: 1px solid var(--border);
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        background: rgba(247, 244, 239, 0.82);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+        max-width: calc(100% - 2.5rem);
+        pointer-events: none;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
     }
 
     .explore-title {
@@ -30,41 +50,192 @@
     }
 
     #explore-map {
-        flex: 1;
+        height: 100%;
         width: 100%;
     }
 
-    .trip-popup {
-        min-width: 200px;
+    .explore-timeline-card {
+        width: 100%;
+        margin-top: 1.5rem;
+        border-radius: 18px;
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+        padding: 1.25rem 1.5rem 1.75rem;
+        display: flex;
+        flex-direction: column;
     }
 
-    .trip-popup-title {
+    .explore-timeline-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 100;
+        isolation: isolate;
+    }
+
+    .explore-timeline-nav-btn {
+        background: #fdfbf8;
+        border: 1px solid var(--border);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        pointer-events: auto;
+    }
+
+    .explore-timeline-nav-btn:hover:not(:disabled) {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: scale(1.1);
+    }
+
+    .explore-timeline-nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .explore-timeline-month-year {
         font-family: var(--font-serif);
         font-size: 1.1rem;
         font-weight: 600;
-        margin: 0 0 0.5rem 0;
         color: var(--text-primary);
+        min-width: 180px;
+        text-align: center;
     }
 
-    .trip-popup-dates {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 0.75rem;
+    .explore-timeline-wrapper {
+        position: relative;
+        height: 80px;
+        z-index: 1;
+        pointer-events: none;
     }
 
-    .trip-popup-btn {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        background: var(--accent);
-        color: white;
-        text-decoration: none;
-        border-radius: 6px;
+    .explore-timeline-line {
+        position: absolute;
+        top: 26px;
+        left: 3%;
+        right: 3%;
+        height: 2px;
+        background: linear-gradient(90deg,
+            #9db89d 0%,
+            #a8bfa8 25%,
+            #8aa18f 50%,
+            #a8bfa8 75%,
+            #9db89d 100%);
+        z-index: 1;
+    }
+
+    .explore-timeline-nodes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        height: 100%;
+        padding: 0 2%;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .explore-timeline-node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+        pointer-events: auto;
+    }
+
+    .explore-timeline-node-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #fbf9f4 center / cover no-repeat;
+        border: 2.5px solid #8aa18f;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(122, 166, 147, 0.15);
+        overflow: hidden;
+    }
+
+    .explore-timeline-node:hover .explore-timeline-node-circle {
+        width: 52px;
+        height: 52px;
+        border-color: #7aa693;
+        box-shadow: 0 4px 12px rgba(122, 166, 147, 0.25);
+        transform: scale(1.05);
+    }
+
+    .explore-timeline-node.active .explore-timeline-node-circle {
+        width: 54px;
+        height: 54px;
+        border-color: #6a9683;
+        box-shadow: 0 6px 16px rgba(122, 166, 147, 0.3);
+    }
+
+    .explore-timeline-node-label {
+        font-size: 0.75rem;
+        color: #5a5a57;
+        font-weight: 600;
+        text-align: center;
+        max-width: 90px;
+        line-height: 1.25;
+    }
+
+    .explore-timeline-label-title {
+        font-weight: 700;
+    }
+
+    .explore-timeline-label-meta {
+        font-size: 0.7rem;
+        opacity: 0.8;
+    }
+
+    .custom-popup {
+        display: flex;
+        gap: 0.75rem;
+        min-width: 220px;
+        padding: 0.5rem;
+    }
+
+    .custom-popup-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .custom-popup-place {
+        font-weight: 600;
         font-size: 0.9rem;
-        transition: all 0.2s ease;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
     }
 
-    .trip-popup-btn:hover {
-        opacity: 0.9;
+    .custom-popup-datetime {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .custom-popup-photo {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
     }
 
     .cluster-icon {
@@ -109,13 +280,26 @@
 
 {% block content %}
 <div class="explore-container">
-    <div class="explore-header">
-        <h1 class="explore-title">Explore Your Journeys</h1>
-        <p class="explore-subtitle">An interactive map of all your travels</p>
+    <div class="explore-map-card">
+        <div class="explore-header">
+            <h1 class="explore-title">Explore Your Journeys</h1>
+            <p class="explore-subtitle">An interactive map of all your travels</p>
+        </div>
+        <div id="explore-map"></div>
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+        </div>
     </div>
-    <div id="explore-map"></div>
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="spinner"></div>
+    <div class="explore-timeline-card" id="exploreTimelineCard">
+        <div class="explore-timeline-header">
+            <button class="explore-timeline-nav-btn" id="exploreTimelinePrevMonth" onclick="navigateExploreTimelineMonth(-1)">←</button>
+            <div class="explore-timeline-month-year" id="exploreTimelineMonthYear">Loading...</div>
+            <button class="explore-timeline-nav-btn" id="exploreTimelineNextMonth" onclick="navigateExploreTimelineMonth(1)">→</button>
+        </div>
+        <div class="explore-timeline-wrapper">
+            <div class="explore-timeline-line" aria-hidden="true"></div>
+            <div class="explore-timeline-nodes" id="exploreTimelineNodes"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -143,6 +327,7 @@
 
             const trips = await response.json();
             renderMap(trips);
+            renderExploreTimeline(trips);
         } catch (error) {
             console.error('Error loading trips:', error);
             alert('Failed to load trips');
@@ -151,7 +336,7 @@
         }
     }
 
-    function renderMap(trips) {
+    async function renderMap(trips) {
         console.log('Rendering explore map with', trips.length, 'trips');
         
         try {
@@ -186,45 +371,82 @@
             });
 
             const bounds = [];
+            const allEntries = [];
 
-            // Add markers for each trip
-            trips.forEach(trip => {
-                // Use a simple geocoding approach: try to extract coordinates from trip location
-                // For now, we'll need entries with actual location data
-                // Let's fetch full trip details to get entry locations
-                fetchTripDetails(trip.id).then(fullTrip => {
-                    if (fullTrip.entries && fullTrip.entries.length > 0) {
-                        fullTrip.entries.forEach(entry => {
-                            if (entry.location && entry.location.latitude && entry.location.longitude) {
-                                const lat = parseFloat(entry.location.latitude);
-                                const lng = parseFloat(entry.location.longitude);
-                                
-                                if (!isNaN(lat) && !isNaN(lng)) {
-                                    const marker = L.marker([lat, lng]);
-                                    
-                                    const popupContent = `
-                                        <div class="trip-popup">
-                                            <div class="trip-popup-title">${trip.title}</div>
-                                            <div class="trip-popup-dates">${formatDateRange(trip.start_date, trip.end_date)}</div>
-                                            <a href="/trip/${trip.id}" class="trip-popup-btn">View Trip</a>
-                                        </div>
-                                    `;
-                                    
-                                    marker.bindPopup(popupContent);
-                                    markerCluster.addLayer(marker);
-                                    bounds.push([lat, lng]);
-                                }
+            // Fetch all trip details and collect entries
+            const tripDetailsPromises = trips.map(trip => fetchTripDetails(trip.id));
+            const tripDetails = await Promise.all(tripDetailsPromises);
+            
+            tripDetails.forEach(fullTrip => {
+                if (fullTrip && fullTrip.entries && fullTrip.entries.length > 0) {
+                    fullTrip.entries.forEach(entry => {
+                        if (entry.location && entry.location.latitude && entry.location.longitude) {
+                            const lat = parseFloat(entry.location.latitude);
+                            const lng = parseFloat(entry.location.longitude);
+                            
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                allEntries.push({
+                                    ...entry,
+                                    trip_id: fullTrip.id,
+                                    trip_title: fullTrip.title,
+                                    lat: lat,
+                                    lng: lng
+                                });
+                                bounds.push([lat, lng]);
                             }
-                        });
-
-                        // Fit bounds if we have markers
-                        if (bounds.length > 0) {
-                            map.addLayer(markerCluster);
-                            map.fitBounds(bounds, { padding: [50, 50] });
                         }
-                    }
-                });
+                    });
+                }
             });
+
+            // Sort entries by date
+            allEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+            // Create polyline connecting entries in sequence
+            if (allEntries.length > 1) {
+                const polylinePoints = allEntries.map(entry => [entry.lat, entry.lng]);
+                L.polyline(polylinePoints, {
+                    color: '#3388ff',
+                    weight: 3,
+                    opacity: 0.8,
+                    smoothFactor: 1
+                }).addTo(map);
+            }
+
+            // Add markers with custom popups
+            allEntries.forEach(entry => {
+                const marker = L.marker([entry.lat, entry.lng]);
+                
+                const entryDate = new Date(entry.entry_date);
+                const dateStr = entryDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                const timeStr = entry.entry_time || '—';
+                const placeName = entry.location?.place_name || entry.location?.address || 'Unknown Location';
+                const photoUrl = entry.photos && entry.photos.length > 0 ? entry.photos[0].url : '/static/images/placeholder-trip.jpg';
+                
+                const popupContent = `
+                    <div class="custom-popup">
+                        <div class="custom-popup-details">
+                            <div class="custom-popup-place">${placeName}</div>
+                            <div class="custom-popup-datetime">${dateStr}</div>
+                            <div class="custom-popup-datetime">${timeStr}</div>
+                        </div>
+                        <img src="${photoUrl}" class="custom-popup-photo" alt="Entry photo">
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markerCluster.addLayer(marker);
+            });
+
+            // Fit bounds if we have markers
+            if (bounds.length > 0) {
+                map.addLayer(markerCluster);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
 
             // Force resize after a delay
             setTimeout(() => {
@@ -233,6 +455,147 @@
             }, 250);
         } catch (error) {
             console.error('Error rendering explore map:', error);
+        }
+    }
+
+    // Explore Timeline state for calendar navigation
+    let exploreTimelineAllEntries = [];
+    let exploreTimelineCurrentMonth = new Date();
+    let exploreTimelineMonthlyEntries = {};
+
+    async function renderExploreTimeline(trips) {
+        const timelineCard = document.getElementById('exploreTimelineCard');
+        const timelineNodes = document.getElementById('exploreTimelineNodes');
+
+        if (!trips || trips.length === 0) {
+            timelineCard.style.display = 'none';
+            return;
+        }
+
+        exploreTimelineAllEntries = [];
+        try {
+            const tripDetails = await Promise.all(trips.map(trip => fetchTripDetails(trip.id)));
+            tripDetails.forEach(fullTrip => {
+                if (fullTrip && fullTrip.entries && fullTrip.entries.length > 0) {
+                    exploreTimelineAllEntries = exploreTimelineAllEntries.concat(fullTrip.entries.map(entry => ({
+                        ...entry,
+                        trip_id: fullTrip.id,
+                        trip_title: fullTrip.title
+                    })));
+                }
+            });
+        } catch (error) {
+            console.error('Error collecting explore timeline entries:', error);
+        }
+
+        if (exploreTimelineAllEntries.length === 0) {
+            timelineCard.style.display = 'none';
+            return;
+        }
+
+        exploreTimelineAllEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+        // Group entries by month
+        exploreTimelineMonthlyEntries = {};
+        exploreTimelineAllEntries.forEach(entry => {
+            const date = new Date(entry.entry_date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!exploreTimelineMonthlyEntries[monthKey]) {
+                exploreTimelineMonthlyEntries[monthKey] = [];
+            }
+            exploreTimelineMonthlyEntries[monthKey].push(entry);
+        });
+
+        // Start with the most recent month
+        const monthKeys = Object.keys(exploreTimelineMonthlyEntries).sort();
+        if (monthKeys.length > 0) {
+            const latestMonthKey = monthKeys[monthKeys.length - 1];
+            const [year, month] = latestMonthKey.split('-');
+            exploreTimelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+        }
+
+        timelineCard.style.display = 'block';
+        updateExploreTimelineDisplay();
+    }
+
+    function updateExploreTimelineDisplay() {
+        const monthKey = `${exploreTimelineCurrentMonth.getFullYear()}-${String(exploreTimelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const monthEntries = exploreTimelineMonthlyEntries[monthKey] || [];
+
+        // Update month/year display
+        const monthYearDisplay = exploreTimelineCurrentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        document.getElementById('exploreTimelineMonthYear').textContent = monthYearDisplay;
+
+        // Update navigation buttons
+        const monthKeys = Object.keys(exploreTimelineMonthlyEntries).sort();
+        const currentIndex = monthKeys.indexOf(monthKey);
+        document.getElementById('exploreTimelinePrevMonth').disabled = currentIndex <= 0;
+        document.getElementById('exploreTimelineNextMonth').disabled = currentIndex >= monthKeys.length - 1;
+
+        // Render nodes
+        const timelineNodes = document.getElementById('exploreTimelineNodes');
+        timelineNodes.innerHTML = '';
+
+        if (monthEntries.length === 0) {
+            timelineNodes.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; width: 100%;">No entries this month</div>';
+            return;
+        }
+
+        const displayEntries = monthEntries.slice(0, 8);
+
+        displayEntries.forEach((entry, index) => {
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'explore-timeline-node';
+            if (index === displayEntries.length - 1) {
+                nodeElement.classList.add('active');
+            }
+
+            const circle = document.createElement('div');
+            circle.className = 'explore-timeline-node-circle';
+            let entryImage = '/static/images/placeholder-trip.jpg';
+            if (entry.photos && entry.photos.length > 0) {
+                entryImage = entry.photos[0].url;
+            }
+            circle.style.backgroundImage = `url('${entryImage}')`;
+
+            const entryDate = new Date(entry.entry_date);
+            const dateStr = entryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const timeStr = entry.entry_time || '—';
+            const locationName = entry.location?.place_name || entry.location?.address || 'Unknown Location';
+
+            const label = document.createElement('div');
+            label.className = 'explore-timeline-node-label';
+            label.innerHTML = `
+                <div class="explore-timeline-label-title">${locationName}</div>
+                <div class="explore-timeline-label-meta">${dateStr}, ${timeStr}</div>
+            `;
+
+            nodeElement.appendChild(circle);
+            nodeElement.appendChild(label);
+
+            nodeElement.onclick = () => {
+                document.querySelectorAll('.explore-timeline-node').forEach(node => {
+                    node.classList.remove('active');
+                });
+                nodeElement.classList.add('active');
+                window.location.href = `/trip/${entry.trip_id}`;
+            };
+
+            timelineNodes.appendChild(nodeElement);
+        });
+    }
+
+    function navigateExploreTimelineMonth(direction) {
+        const monthKeys = Object.keys(exploreTimelineMonthlyEntries).sort();
+        const currentKey = `${exploreTimelineCurrentMonth.getFullYear()}-${String(exploreTimelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const currentIndex = monthKeys.indexOf(currentKey);
+        
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < monthKeys.length) {
+            const newKey = monthKeys[newIndex];
+            const [year, month] = newKey.split('-');
+            exploreTimelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+            updateExploreTimelineDisplay();
         }
     }
 

@@ -646,6 +646,41 @@
         }
     }
 
+    /* Custom Map Popup */
+    .custom-popup {
+        display: flex;
+        gap: 0.75rem;
+        min-width: 220px;
+        padding: 0.5rem;
+    }
+
+    .custom-popup-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .custom-popup-place {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .custom-popup-datetime {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .custom-popup-photo {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
     /* Journey Timeline */
     .timeline-container {
         position: relative;
@@ -653,19 +688,71 @@
         background: #fdfbf8;
         padding: 1.5rem 2rem;
         border-bottom: 1px solid var(--border);
-        display: none;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .timeline-header {
+        max-width: 1400px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        position: relative;
+        z-index: 100;
+        isolation: isolate;
+    }
+
+    .timeline-nav-btn {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        pointer-events: auto;
+    }
+
+    .timeline-nav-btn:hover:not(:disabled) {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: scale(1.1);
+    }
+
+    .timeline-nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .timeline-month-year {
+        font-family: var(--font-serif);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 200px;
+        text-align: center;
     }
 
     .timeline-wrapper {
         max-width: 1400px;
         margin: 0 auto;
         position: relative;
-        height: 60px;
+        height: 70px;
+        z-index: 1;
+        pointer-events: none;
     }
 
     .timeline-line {
         position: absolute;
-        top: 50%;
+        top: 20px;
         left: 3%;
         right: 3%;
         height: 2px;
@@ -675,21 +762,21 @@
             #8aa18f 50%, 
             #a8bfa8 75%, 
             #9db89d 100%);
-        transform: translateY(-1px);
         z-index: 1;
     }
 
     .timeline-nodes {
         position: absolute;
-        top: 50%;
+        top: 0;
         left: 0;
         right: 0;
+        bottom: 0;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        height: 100%;
         padding: 0 2%;
         z-index: 2;
+        pointer-events: none;
     }
 
     .timeline-node {
@@ -701,6 +788,7 @@
         cursor: pointer;
         transition: all 0.3s ease;
         flex: 1;
+        pointer-events: auto;
     }
 
     .timeline-node-circle {
@@ -957,6 +1045,11 @@
 
         <!-- Journey Timeline -->
         <div id="timelineContainer" class="timeline-container">
+            <div class="timeline-header">
+                <button class="timeline-nav-btn" id="timelinePrevMonth" onclick="navigateTimelineMonth(-1)">←</button>
+                <div class="timeline-month-year" id="timelineMonthYear">Loading...</div>
+                <button class="timeline-nav-btn" id="timelineNextMonth" onclick="navigateTimelineMonth(1)">→</button>
+            </div>
             <div class="timeline-wrapper">
                 <div class="timeline-line" aria-hidden="true"></div>
                 <div class="timeline-nodes" id="timelineNodes"></div>
@@ -1394,8 +1487,9 @@
                 }).addTo(dashMap);
 
                 const bounds = [];
+                const allEntries = [];
 
-                // Load trip details and add markers
+                // Load trip details and collect all entries
                 for (const trip of trips) {
                     try {
                         const response = await fetch(`/trips/${trip.id}`, { credentials: 'include' });
@@ -1408,8 +1502,13 @@
                                         const lng = parseFloat(entry.location.longitude);
                                         
                                         if (!isNaN(lat) && !isNaN(lng)) {
-                                            const marker = L.marker([lat, lng]).addTo(dashMap);
-                                            marker.bindPopup(`<b>${trip.title}</b><br><a href="/trip/${trip.id}">View Trip</a>`);
+                                            allEntries.push({
+                                                ...entry,
+                                                trip_id: trip.id,
+                                                trip_title: trip.title,
+                                                lat: lat,
+                                                lng: lng
+                                            });
                                             bounds.push([lat, lng]);
                                         }
                                     }
@@ -1420,6 +1519,48 @@
                         console.error(`Error loading trip ${trip.id}:`, error);
                     }
                 }
+
+                // Sort entries by date
+                allEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+
+                // Create polyline connecting entries in sequence
+                if (allEntries.length > 1) {
+                    const polylinePoints = allEntries.map(entry => [entry.lat, entry.lng]);
+                    L.polyline(polylinePoints, {
+                        color: '#3388ff',
+                        weight: 3,
+                        opacity: 0.8,
+                        smoothFactor: 1
+                    }).addTo(dashMap);
+                }
+
+                // Add markers with custom popups
+                allEntries.forEach(entry => {
+                    const marker = L.marker([entry.lat, entry.lng]).addTo(dashMap);
+                    
+                    const entryDate = new Date(entry.entry_date);
+                    const dateStr = entryDate.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    });
+                    const timeStr = entry.entry_time || '—';
+                    const placeName = entry.location?.place_name || entry.location?.address || 'Unknown Location';
+                    const photoUrl = entry.photos && entry.photos.length > 0 ? entry.photos[0].url : '/static/images/placeholder-trip.jpg';
+                    
+                    const popupContent = `
+                        <div class="custom-popup">
+                            <div class="custom-popup-details">
+                                <div class="custom-popup-place">${placeName}</div>
+                                <div class="custom-popup-datetime">${dateStr}</div>
+                                <div class="custom-popup-datetime">${timeStr}</div>
+                            </div>
+                            <img src="${photoUrl}" class="custom-popup-photo" alt="Entry photo">
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                });
 
                 if (bounds.length > 0) {
                     dashMap.fitBounds(bounds, { padding: [50, 50] });
@@ -1439,6 +1580,11 @@
         }, 200);
     }
 
+    // Timeline state for calendar navigation
+    let timelineAllEntries = [];
+    let timelineCurrentMonth = new Date();
+    let timelineMonthlyEntries = {};
+
     // Render journey timeline
     async function renderTimeline(trips) {
         const timelineContainer = document.getElementById('timelineContainer');
@@ -1450,7 +1596,7 @@
         }
 
         // Collect all entries from all trips
-        let allEntries = [];
+        timelineAllEntries = [];
         try {
             for (const trip of trips) {
                 try {
@@ -1458,7 +1604,7 @@
                     if (response.ok) {
                         const fullTrip = await response.json();
                         if (fullTrip.entries && fullTrip.entries.length > 0) {
-                            allEntries = allEntries.concat(fullTrip.entries.map(entry => ({
+                            timelineAllEntries = timelineAllEntries.concat(fullTrip.entries.map(entry => ({
                                 ...entry,
                                 trip_id: trip.id,
                                 trip_title: trip.title
@@ -1474,21 +1620,63 @@
         }
 
         // If no entries, hide timeline
-        if (allEntries.length === 0) {
+        if (timelineAllEntries.length === 0) {
             timelineContainer.style.display = 'none';
             return;
         }
 
         // Sort entries by date
-        allEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
+        timelineAllEntries.sort((a, b) => new Date(a.entry_date) - new Date(b.entry_date));
 
-        // Limit to last 8 entries to avoid crowding
-        const displayEntries = allEntries.slice(-8);
+        // Group entries by month
+        timelineMonthlyEntries = {};
+        timelineAllEntries.forEach(entry => {
+            const date = new Date(entry.entry_date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!timelineMonthlyEntries[monthKey]) {
+                timelineMonthlyEntries[monthKey] = [];
+            }
+            timelineMonthlyEntries[monthKey].push(entry);
+        });
 
-        // Clear previous nodes
+        // Start with the most recent month that has entries
+        const monthKeys = Object.keys(timelineMonthlyEntries).sort();
+        if (monthKeys.length > 0) {
+            const latestMonthKey = monthKeys[monthKeys.length - 1];
+            const [year, month] = latestMonthKey.split('-');
+            timelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+        }
+
+        // Display the timeline
+        timelineContainer.style.display = 'block';
+        updateTimelineDisplay();
+    }
+
+    function updateTimelineDisplay() {
+        const monthKey = `${timelineCurrentMonth.getFullYear()}-${String(timelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const monthEntries = timelineMonthlyEntries[monthKey] || [];
+        
+        // Update month/year display
+        const monthYearDisplay = timelineCurrentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        document.getElementById('timelineMonthYear').textContent = monthYearDisplay;
+
+        // Update navigation buttons
+        const monthKeys = Object.keys(timelineMonthlyEntries).sort();
+        const currentIndex = monthKeys.indexOf(monthKey);
+        document.getElementById('timelinePrevMonth').disabled = currentIndex <= 0;
+        document.getElementById('timelineNextMonth').disabled = currentIndex >= monthKeys.length - 1;
+
+        // Render nodes
+        const timelineNodes = document.getElementById('timelineNodes');
         timelineNodes.innerHTML = '';
 
-        // Create timeline nodes
+        if (monthEntries.length === 0) {
+            timelineNodes.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 0.9rem; width: 100%;">No entries this month</div>';
+            return;
+        }
+
+        // Create timeline nodes (limit to 8 for display)
+        const displayEntries = monthEntries.slice(0, 8);
         displayEntries.forEach((entry, index) => {
             const nodeElement = document.createElement('div');
             nodeElement.className = 'timeline-node';
@@ -1559,9 +1747,27 @@
 
             timelineNodes.appendChild(nodeElement);
         });
+    }
 
-        // Show timeline
-        timelineContainer.style.display = 'block';
+    function navigateTimelineMonth(direction) {
+        console.log('Navigate timeline called with direction:', direction);
+        const monthKeys = Object.keys(timelineMonthlyEntries).sort();
+        const currentKey = `${timelineCurrentMonth.getFullYear()}-${String(timelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const currentIndex = monthKeys.indexOf(currentKey);
+        console.log('Month keys:', monthKeys);
+        console.log('Current key:', currentKey, 'Index:', currentIndex);
+        
+        const newIndex = currentIndex + direction;
+        console.log('New index:', newIndex);
+        if (newIndex >= 0 && newIndex < monthKeys.length) {
+            const newKey = monthKeys[newIndex];
+            const [year, month] = newKey.split('-');
+            timelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+            console.log('Navigating to:', newKey);
+            updateTimelineDisplay();
+        } else {
+            console.log('Cannot navigate - out of bounds');
+        }
     }
 
     // Show entry card overlay positioned at clicked node

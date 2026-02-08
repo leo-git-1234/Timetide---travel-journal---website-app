@@ -75,8 +75,56 @@
         border-radius: 12px;
         box-shadow: var(--shadow-soft);
         display: flex;
-        align-items: flex-start;
+        flex-direction: column;
         overflow: visible;
+    }
+
+    .trip-timeline-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 100;
+        isolation: isolate;
+    }
+
+    .trip-timeline-nav-btn {
+        background: #fdfbf8;
+        border: 1px solid var(--border);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        pointer-events: auto;
+    }
+
+    .trip-timeline-nav-btn:hover:not(:disabled) {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: scale(1.1);
+    }
+
+    .trip-timeline-nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .trip-timeline-month-year {
+        font-family: var(--font-serif);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        min-width: 160px;
+        text-align: center;
     }
 
     .trip-timeline-wrapper {
@@ -87,6 +135,10 @@
         overflow-y: visible;
         gap: 1.5rem;
         position: relative;
+        z-index: 1;
+        pointer-events: none;
+        min-height: 70px;
+        padding-bottom: 0.5rem;
     }
 
     .trip-timeline-line {
@@ -105,6 +157,7 @@
         gap: 1.5rem;
         position: relative;
         z-index: 2;
+        pointer-events: none;
     }
 
     .trip-timeline-node {
@@ -115,6 +168,7 @@
         transition: all 0.2s ease;
         white-space: nowrap;
         flex-shrink: 0;
+        pointer-events: auto;
     }
 
     .trip-timeline-node-circle {
@@ -953,6 +1007,11 @@
 
         <!-- Trip Timeline Node Component -->
         <div class="trip-timeline-container" id="tripTimelineContainer" style="display: none;">
+            <div class="trip-timeline-header">
+                <button class="trip-timeline-nav-btn" id="tripTimelinePrevMonth" onclick="navigateTripTimelineMonth(-1)">←</button>
+                <div class="trip-timeline-month-year" id="tripTimelineMonthYear">Loading...</div>
+                <button class="trip-timeline-nav-btn" id="tripTimelineNextMonth" onclick="navigateTripTimelineMonth(1)">→</button>
+            </div>
             <div class="trip-timeline-wrapper">
                 <div class="trip-timeline-line" aria-hidden="true"></div>
                 <div class="trip-timeline-nodes" id="tripTimelineNodes"></div>
@@ -1377,6 +1436,11 @@
         }
     }
 
+    // Trip Timeline state for calendar navigation
+    let tripTimelineAllEntries = [];
+    let tripTimelineCurrentMonth = new Date();
+    let tripTimelineMonthlyEntries = {};
+
     // Render trip timeline
     function renderTripTimeline(entries) {
         if (!entries || entries.length === 0) return;
@@ -1384,17 +1448,61 @@
         const timelineContainer = document.getElementById('tripTimelineContainer');
         const timelineNodes = document.getElementById('tripTimelineNodes');
         
-        // Sort entries by date
-        const sortedEntries = [...entries].sort((a, b) => 
+        // Store all entries
+        tripTimelineAllEntries = [...entries].sort((a, b) => 
             new Date(a.entry_date) - new Date(b.entry_date)
         );
+
+        // Group entries by month
+        tripTimelineMonthlyEntries = {};
+        tripTimelineAllEntries.forEach(entry => {
+            const date = new Date(entry.entry_date);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!tripTimelineMonthlyEntries[monthKey]) {
+                tripTimelineMonthlyEntries[monthKey] = [];
+            }
+            tripTimelineMonthlyEntries[monthKey].push(entry);
+        });
+
+        // Start with the most recent month
+        const monthKeys = Object.keys(tripTimelineMonthlyEntries).sort();
+        if (monthKeys.length > 0) {
+            const latestMonthKey = monthKeys[monthKeys.length - 1];
+            const [year, month] = latestMonthKey.split('-');
+            tripTimelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+        }
+
+        timelineContainer.style.display = 'flex';
+        updateTripTimelineDisplay();
+    }
+
+    function updateTripTimelineDisplay() {
+        const monthKey = `${tripTimelineCurrentMonth.getFullYear()}-${String(tripTimelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const monthEntries = tripTimelineMonthlyEntries[monthKey] || [];
         
-        // Take last 5 entries to avoid crowding
-        const recentEntries = sortedEntries.slice(-5);
-        
+        // Update month/year display
+        const monthYearDisplay = tripTimelineCurrentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        document.getElementById('tripTimelineMonthYear').textContent = monthYearDisplay;
+
+        // Update navigation buttons
+        const monthKeys = Object.keys(tripTimelineMonthlyEntries).sort();
+        const currentIndex = monthKeys.indexOf(monthKey);
+        document.getElementById('tripTimelinePrevMonth').disabled = currentIndex <= 0;
+        document.getElementById('tripTimelineNextMonth').disabled = currentIndex >= monthKeys.length - 1;
+
+        // Render nodes
+        const timelineNodes = document.getElementById('tripTimelineNodes');
         timelineNodes.innerHTML = '';
+
+        if (monthEntries.length === 0) {
+            timelineNodes.innerHTML = '<div style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; width: 100%;">No entries this month</div>';
+            return;
+        }
+
+        // Display up to 8 entries for this month
+        const displayEntries = monthEntries.slice(0, 8);
         
-        recentEntries.forEach((entry, index) => {
+        displayEntries.forEach((entry, index) => {
             const node = document.createElement('div');
             node.className = 'trip-timeline-node';
             
@@ -1435,8 +1543,20 @@
             
             timelineNodes.appendChild(node);
         });
+    }
+
+    function navigateTripTimelineMonth(direction) {
+        const monthKeys = Object.keys(tripTimelineMonthlyEntries).sort();
+        const currentKey = `${tripTimelineCurrentMonth.getFullYear()}-${String(tripTimelineCurrentMonth.getMonth() + 1).padStart(2, '0')}`;
+        const currentIndex = monthKeys.indexOf(currentKey);
         
-        timelineContainer.style.display = 'block';
+        const newIndex = currentIndex + direction;
+        if (newIndex >= 0 && newIndex < monthKeys.length) {
+            const newKey = monthKeys[newIndex];
+            const [year, month] = newKey.split('-');
+            tripTimelineCurrentMonth = new Date(parseInt(year), parseInt(month) - 1);
+            updateTripTimelineDisplay();
+        }
     }
 
     // Render map - SIMPLIFIED VERSION
