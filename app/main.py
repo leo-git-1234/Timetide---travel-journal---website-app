@@ -14,7 +14,7 @@ from app.models import init_db, get_db
 from app.models.database import User, Trip, Entry
 from app.routes import trips, entries, users
 from app.routes import auth_jwt as auth_routes
-from app.routes import my_trips
+from app.routes import my_trips, revisit
 from app.auth.session import get_current_user_from_request
 
 # Initialize FastAPI app
@@ -81,6 +81,7 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(trips.router, prefix="/trips", tags=["Trips"])
 app.include_router(entries.router, prefix="/entries", tags=["Entries"])
 app.include_router(my_trips.router, tags=["Pages"])
+app.include_router(revisit.router, tags=["Pages"])
 
 
 # ========================================

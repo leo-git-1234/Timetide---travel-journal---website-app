@@ -536,7 +536,9 @@
         const dateRange = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
         const daysCount = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        const entriesCount = trip.fullData?.entries?.length || 0;
+        const entriesCount = trip.fullData?.statistics?.num_entries ?? 0;
+        const photosCount = trip.fullData?.statistics?.num_photos ?? 0;
+        const placesCount = trip.fullData?.statistics?.num_locations ?? 0;
         const tripLocation = trip.location || 'Unknown Location';
 
         const now = new Date();
@@ -581,7 +583,11 @@
                     </div>
                     <div class="trip-metadata-item">
                         <span class="trip-metadata-icon">📍</span>
-                        <span>${tripLocation}</span>
+                        <span>${placesCount} ${placesCount === 1 ? 'place' : 'places'}</span>
+                    </div>
+                    <div class="trip-metadata-item">
+                        <span class="trip-metadata-icon">📷</span>
+                        <span>${photosCount} ${photosCount === 1 ? 'photo' : 'photos'}</span>
                     </div>
                 </div>
             </div>

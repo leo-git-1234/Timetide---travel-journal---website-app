@@ -1,0 +1,882 @@
+{% extends "base.html" %}
+
+{% block title %}Revisit - Timetide{% endblock %}
+
+{% block extra_css %}
+<style>
+    .revisit-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+    }
+
+    .revisit-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .revisit-title {
+        font-family: var(--font-serif);
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        color: var(--text-primary);
+        margin: 0 0 0.75rem 0;
+        letter-spacing: -1px;
+    }
+
+    .revisit-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin: 0;
+        font-weight: 400;
+    }
+
+    .revisit-content {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    .revisit-main {
+        display: flex;
+        flex-direction: column;
+        gap: 3.5rem;
+    }
+
+    /* Featured Journey */
+    .featured-journey {
+        background: var(--surface);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .featured-journey:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    .featured-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .featured-image-placeholder {
+        background: linear-gradient(135deg, var(--surface-alt) 0%, var(--border) 100%);
+        height: 120px;
+    }
+
+    .featured-body {
+        padding: 1rem 1.5rem;
+    }
+
+    .featured-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .featured-info h2 {
+        font-family: var(--font-serif);
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+        line-height: 1.2;
+    }
+
+    .featured-dates {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .featured-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #4ade80;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .status-badge.ongoing {
+        background: #f4c430;
+        color: #2D2A28;
+    }
+
+    .status-badge:hover {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+
+    .favorite-btn {
+        background: none;
+        border: 2px solid var(--border);
+        color: var(--text-secondary);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+        flex-shrink: 0;
+    }
+
+    .favorite-btn:hover {
+        border-color: #f4c430;
+        color: #f4c430;
+        background: rgba(244, 196, 48, 0.05);
+    }
+
+    .favorite-btn.is-favorite {
+        border-color: #f4c430;
+        color: #f4c430;
+        background: rgba(244, 196, 48, 0.1);
+    }
+
+    .featured-description {
+        color: var(--text-primary);
+        line-height: 1.8;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+    }
+
+    .featured-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        padding: 2rem 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        margin: 1.5rem 0;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-family: var(--font-serif);
+        font-size: 1.6rem;
+        color: var(--accent);
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .featured-footer {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.85rem 1.75rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+        background: #5a7a68;
+        transform: translateX(3px);
+    }
+
+    /* Places That Spanned Years */
+    .places-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .section-title {
+        font-family: var(--font-serif);
+        font-size: 1.6rem;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        margin: 0.5rem 0 0 0;
+    }
+
+    .year-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .year-card {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        aspect-ratio: 1;
+        cursor: pointer;
+        box-shadow: var(--shadow-soft);
+        transition: var(--transition);
+    }
+
+    .year-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+
+    .year-card-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .year-card-image-placeholder {
+        background: linear-gradient(135deg, var(--surface-alt) 0%, var(--border) 100%);
+        height: 100%;
+    }
+
+    .year-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+        color: white;
+        padding: 2rem 1.5rem 1.5rem;
+        text-align: center;
+    }
+
+    .year-label {
+        font-family: var(--font-serif);
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    /* Sidebar */
+    .revisit-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        position: sticky;
+        top: 100px;
+    }
+
+    .sidebar-card {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 1.75rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .sidebar-title {
+        font-family: var(--font-serif);
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin: 0 0 1.2rem 0;
+        font-weight: 600;
+    }
+
+    .recent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .recent-item {
+        padding: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .recent-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .recent-photo {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .recent-photo-placeholder {
+        background: linear-gradient(135deg, var(--surface-alt) 0%, var(--border) 100%);
+        height: 120px;
+    }
+
+    .recent-info {
+        padding: 0.8rem;
+        background: var(--surface);
+    }
+
+    .recent-title {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        margin: 0 0 0.3rem 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .recent-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .recent-location {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0.2rem 0 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Past Journeys */
+    .past-journeys {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .year-group {
+        border-radius: 8px;
+    }
+
+    .year-header {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.85rem;
+        background: var(--surface-alt);
+        border-radius: 8px;
+        user-select: none;
+        transition: var(--transition);
+    }
+
+    .year-header:hover {
+        background: rgba(110, 140, 120, 0.15);
+    }
+
+    .year-toggle {
+        background: none;
+        border: none;
+        color: var(--accent);
+        font-size: 0.7rem;
+        margin-right: 0.8rem;
+        cursor: pointer;
+        padding: 0;
+        width: 18px;
+        text-align: center;
+        transition: var(--transition);
+        font-weight: 600;
+    }
+
+    .year-toggle.expanded::before {
+        content: '▼';
+    }
+
+    .year-toggle.collapsed::before {
+        content: '▶';
+    }
+
+    .year-trips {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.8rem;
+        margin-left: 1.8rem;
+        max-height: 1000px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .year-trips.hidden {
+        display: none;
+    }
+
+    .year-trip {
+        display: flex;
+        align-items: center;
+        padding: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: var(--transition);
+        gap: 0;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+    }
+
+    .year-trip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .year-trip-photo {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .year-trip-photo-placeholder {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--surface-alt) 0%, var(--border) 100%);
+        flex-shrink: 0;
+    }
+
+    .trip-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: none;
+    }
+
+    .trip-info {
+        flex: 1;
+        min-width: 0;
+        padding: 0.7rem 0.8rem;
+    }
+
+    .trip-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .trip-date {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0.2rem 0 0 0;
+    }
+
+    .trip-entries {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        margin: 0.2rem 0 0 0;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-text {
+        color: var(--text-secondary);
+        margin-bottom: 1.75rem;
+        font-size: 0.95rem;
+    }
+
+    .empty-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.85rem 1.75rem;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: var(--transition);
+    }
+
+    .empty-btn:hover {
+        background: #5a7a68;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .revisit-content {
+            grid-template-columns: 1fr;
+        }
+
+        .revisit-sidebar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            position: static;
+            top: auto;
+            gap: 1.5rem;
+        }
+
+        .year-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .featured-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .revisit-container {
+            padding: 2rem 1rem;
+        }
+
+        .revisit-title {
+            font-size: 2rem;
+        }
+
+        .featured-image,
+        .featured-image-placeholder {
+            height: 280px;
+        }
+
+        .featured-body {
+            padding: 1.5rem 2rem;
+        }
+
+        .featured-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .featured-header {
+            flex-direction: column;
+        }
+
+        .featured-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .year-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .revisit-sidebar {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-card {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .revisit-container {
+            padding: 1.5rem 0.75rem;
+        }
+
+        .revisit-title {
+            font-size: 1.5rem;
+        }
+
+        .featured-image,
+        .featured-image-placeholder {
+            height: 220px;
+        }
+
+        .featured-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .featured-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .year-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-card {
+            padding: 1rem;
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="revisit-container">
+
+    <div class="revisit-container">
+    <div class="revisit-header">
+        <h1 class="revisit-title">{{ page_title }}</h1>
+        <p class="revisit-subtitle">{{ page_subtitle }}</p>
+    </div>
+
+    {% if featured_trip %}
+        <div class="revisit-content">
+            <div class="revisit-main">
+                <!-- Featured Journey -->
+                <div class="featured-journey" onclick="window.location.href='/trip/{{ featured_trip.id }}'">
+                    {% if featured_trip.cover_image %}
+                        <img src="{{ featured_trip.cover_image }}" alt="{{ featured_trip.title }}" class="featured-image">
+                    {% else %}
+                        <div class="featured-image-placeholder"></div>
+                    {% endif %}
+                    
+                    <div class="featured-body">
+                        <div class="featured-header">
+                            <div class="featured-info">
+                                <h2>{{ featured_trip.title }}</h2>
+                                <p class="featured-dates">{{ featured_trip.start_date }} – {{ featured_trip.end_date }}</p>
+                            </div>
+                            <div class="featured-actions">
+                                <span class="status-badge {% if featured_trip.status and featured_trip.status.lower() == 'ongoing' %}ongoing{% endif %}" 
+                                      style="cursor: pointer;"
+                                      onclick="event.stopPropagation(); toggleStatus({{ featured_trip.id }})">{{ featured_trip.status or 'Completed' }}</span>
+                                <button class="favorite-btn {% if featured_trip.is_favorite %}is-favorite{% endif %}" 
+                                        onclick="event.stopPropagation(); toggleFavorite({{ featured_trip.id }})">
+                                    ★
+                                </button>
+                            </div>
+                        </div>
+
+                        {% if featured_trip.description %}
+                            <p class="featured-description">{{ featured_trip.description }}</p>
+                        {% endif %}
+
+                        <div class="featured-stats">
+                            <div class="stat-item">
+                                <p class="stat-value">{{ featured_trip.num_entries }}</p>
+                                <p class="stat-label">Entries</p>
+                            </div>
+                            <div class="stat-item">
+                                <p class="stat-value">{{ featured_trip.num_photos }}</p>
+                                <p class="stat-label">Photos</p>
+                            </div>
+                            <div class="stat-item">
+                                <p class="stat-value">
+                                    {% set days = ((featured_trip.end_date|string|replace('-', ''))|int - (featured_trip.start_date|string|replace('-', ''))|int + 1) %}
+                                    {{ [1, days]|max }}
+                                </p>
+                                <p class="stat-label">Days</p>
+                            </div>
+                            <div class="stat-item">
+                                <p class="stat-value">
+                                    {% set places = 0 %}
+                                    {% for entry in featured_trip.entries %}
+                                        {% if entry.location %}
+                                            {% set places = places + 1 %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {{ places }}
+                                </p>
+                                <p class="stat-label">Places</p>
+                            </div>
+                        </div>
+
+                        <div class="featured-footer">
+                            <a href="/trip/{{ featured_trip.id }}" class="btn-primary">Open Journey →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Places That Spanned Years -->
+                {% if trips_by_year %}
+                    <div class="places-section">
+                        <h2 class="section-title">Places That Spanned Years</h2>
+                        <p class="section-subtitle">Your favorite destinations across time</p>
+                        <div class="year-grid">
+                            {% for year_data in trips_by_year %}
+                                <div class="year-card" onclick="window.location.href='/trip/{{ year_data.trip.id }}'">
+                                    {% if year_data.trip.cover_image %}
+                                        <img src="{{ year_data.trip.cover_image }}" alt="{{ year_data.trip.title }}" class="year-card-image">
+                                    {% else %}
+                                        <div class="year-card-image-placeholder"></div>
+                                    {% endif %}
+                                    <div class="year-overlay">
+                                        <p class="year-label">{{ year_data.year }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="revisit-sidebar">
+                <!-- Recent Journeys -->
+                {% if recent_trips %}
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">Recent Journeys</h3>
+                        <div class="recent-list">
+                            {% for trip in recent_trips %}
+                                <div class="recent-item" onclick="window.location.href='/trip/{{ trip.id }}'">
+                                    {% if trip.cover_image %}
+                                        <img src="{{ trip.cover_image }}" alt="{{ trip.title }}" class="recent-photo">
+                                    {% else %}
+                                        <div class="recent-photo-placeholder"></div>
+                                    {% endif %}
+                                    <div class="recent-info">
+                                        <p class="recent-title">{{ trip.title }}</p>
+                                        <p class="recent-date">{{ trip.start_date }}</p>
+                                        {% if trip.location %}
+                                            <p class="recent-location">📍 {{ trip.location }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Past Journeys -->
+                {% if past_journeys %}
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title">Past Journeys</h3>
+                        <div class="past-journeys">
+                            {% for year_group in past_journeys %}
+                                <div class="year-group">
+                                    <div class="year-header" onclick="toggleYear(this)">
+                                        <button class="year-toggle expanded"></button>
+                                        <span class="year-label">{{ year_group.year }}</span>
+                                    </div>
+                                    <div class="year-trips">
+                                        {% for trip in year_group.trips %}
+                                            <div class="year-trip" onclick="event.stopPropagation(); window.location.href='/trip/{{ trip.id }}'">
+                                                {% if trip.cover_image %}
+                                                    <img src="{{ trip.cover_image }}" alt="{{ trip.title }}" class="year-trip-photo">
+                                                {% else %}
+                                                    <div class="year-trip-photo-placeholder"></div>
+                                                {% endif %}
+                                                <div class="trip-info">
+                                                    <p class="trip-name">{{ trip.title }}</p>
+                                                    <p class="trip-date">{{ trip.start_date }}</p>
+                                                    <p class="trip-entries">{{ trip.num_entries }} entries</p>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📔</div>
+            <p class="empty-text">No trips found. Start your first journey to see memories here.</p>
+            <a href="/dashboard" class="empty-btn">Create New Trip</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleYear(element) {
+        const toggle = element.querySelector('.year-toggle');
+        const trips = element.nextElementSibling;
+        
+        if (trips.classList.contains('hidden')) {
+            trips.classList.remove('hidden');
+            toggle.classList.remove('collapsed');
+            toggle.classList.add('expanded');
+        } else {
+            trips.classList.add('hidden');
+            toggle.classList.remove('expanded');
+            toggle.classList.add('collapsed');
+        }
+    }
+
+    function toggleFavorite(tripId) {
+        fetch(`/trips/${tripId}/favorite`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ is_favorite: null })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const btn = event.target;
+            btn.classList.toggle('is-favorite');
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function toggleStatus(tripId) {
+        const statusBadge = event.target;
+        const currentStatus = statusBadge.textContent.toLowerCase().trim();
+        const newStatus = currentStatus === 'completed' ? 'ongoing' : 'completed';
+        
+        fetch(`/trips/${tripId}/status`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+            if (data.status.toLowerCase() === 'ongoing') {
+                statusBadge.classList.add('ongoing');
+            } else {
+                statusBadge.classList.remove('ongoing');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>
+{% endblock %}
