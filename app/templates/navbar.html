@@ -28,6 +28,7 @@
                         <div class="dropdown-divider"></div>
                         <a href="/profile" class="dropdown-link">Profile</a>
                         <a href="/settings" class="dropdown-link">Settings</a>
+                        <a href="#" onclick="openInvitesModal(); return false;" class="dropdown-link">Invites <span id="invitesBadge" class="invites-badge" style="display: none;"></span></a>
                         <div class="dropdown-divider"></div>
                         <a href="#" onclick="logout(); return false;" class="dropdown-link logout-link">Sign Out</a>
                     </div>
@@ -53,6 +54,21 @@
         {% endif %}
     </div>
 </nav>
+
+<!-- Invites Modal -->
+<div id="invitesModal" class="invites-modal">
+    <div class="invites-modal-content">
+        <div class="invites-modal-header">
+            <span>Trip Invites</span>
+            <button onclick="closeInvitesModal()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--text-secondary);">×</button>
+        </div>
+        <div class="invites-modal-body" id="invitesModalBody">
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                <p>Loading invites...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function logout() {
@@ -102,6 +118,124 @@
                 }
                 event.stopPropagation();
             });
+        }
+    });
+
+    // Invites Modal Functions
+    async function openInvitesModal() {
+        const modal = document.getElementById('invitesModal');
+        const body = document.getElementById('invitesModalBody');
+        
+        modal.classList.add('show');
+        body.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>Loading invites...</p></div>';
+        
+        try {
+            const response = await fetch('/sharing/invites', {
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    body.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>Please log in to view invites</p></div>';
+                } else {
+                    throw new Error('Failed to load invites');
+                }
+                return;
+            }
+            
+            const data = await response.json();
+            const pendingInvites = data.pending || [];
+            
+            if (pendingInvites.length === 0) {
+                body.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>No pending invites</p></div>';
+                return;
+            }
+            
+            // Update badge count
+            const badge = document.getElementById('invitesBadge');
+            if (badge) {
+                badge.textContent = pendingInvites.length;
+                badge.style.display = 'inline-flex';
+            }
+            
+            let html = '';
+            pendingInvites.forEach(invite => {
+                html += `
+                    <div class="invite-item">
+                        <div class="invite-trip">${invite.trip_title}</div>
+                        <div class="invite-from">From: ${invite.inviter_email}</div>
+                        <div class="invite-from">Permission: <strong>${invite.permission_level}</strong></div>
+                        <div class="invite-actions">
+                            <button class="invite-btn invite-btn-accept" onclick="acceptInvite(${invite.id})">Accept</button>
+                            <button class="invite-btn invite-btn-decline" onclick="declineInvite(${invite.id})">Decline</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            body.innerHTML = html;
+        } catch (error) {
+            console.error('Error loading invites:', error);
+            body.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);"><p>Error loading invites</p></div>';
+        }
+    }
+
+    function closeInvitesModal() {
+        const modal = document.getElementById('invitesModal');
+        modal.classList.remove('show');
+    }
+
+    async function acceptInvite(inviteId) {
+        try {
+            const response = await fetch(`/sharing/invites/${inviteId}/accept`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to accept invite');
+            }
+            
+            // Refresh invites list
+            openInvitesModal();
+            alert('Invite accepted! You can now access the trip.');
+        } catch (error) {
+            console.error('Error accepting invite:', error);
+            alert('Failed to accept invite');
+        }
+    }
+
+    async function declineInvite(inviteId) {
+        try {
+            const response = await fetch(`/sharing/invites/${inviteId}/decline`, {
+                method: 'PUT',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to decline invite');
+            }
+            
+            // Refresh invites list
+            openInvitesModal();
+            alert('Invite declined.');
+        } catch (error) {
+            console.error('Error declining invite:', error);
+            alert('Failed to decline invite');
+        }
+    }
+
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('invitesModal');
+        if (event.target === modal) {
+            closeInvitesModal();
         }
     });
 </script>
@@ -191,6 +325,117 @@
         opacity: 0.9;
     }
 
+    .invites-badge {
+        display: inline-block;
+        background: #c94848;
+        color: white;
+        border-radius: 50%;
+        min-width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 0.5rem;
+        font-weight: 600;
+    }
+
+    .invites-modal {
+        display: none;
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .invites-modal.show {
+        display: block;
+    }
+
+    .invites-modal-content {
+        background-color: var(--surface);
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 500px;
+        max-height: 600px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .invites-modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+        font-size: 1.1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .invites-modal-body {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .invite-item {
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .invite-trip {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .invite-from {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .invite-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .invite-btn {
+        flex: 1;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .invite-btn-accept {
+        background: #4ade80;
+        color: white;
+    }
+
+    .invite-btn-accept:hover {
+        opacity: 0.9;
+    }
+
+    .invite-btn-decline {
+        background: var(--surface-alt);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+    }
+
+    .invite-btn-decline:hover {
+        background: var(--border);
+    }
+
     @media (max-width: 768px) {
         .auth-buttons {
             gap: 0.5rem;
@@ -203,6 +448,10 @@
 
         .dropdown-content {
             width: 220px;
+        }
+
+        .invites-modal-content {
+            width: 90%;
         }
     }
 </style>

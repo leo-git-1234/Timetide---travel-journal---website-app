@@ -1,6 +1,6 @@
 """Entry-related API routes."""
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Header, Cookie
 from sqlalchemy.orm import Session
 from datetime import date
 from pydantic import BaseModel, Field
@@ -240,10 +240,20 @@ class EntryUpdate(BaseModel):
 
 
 # Helper function to get current user from cookies
-async def get_current_user_from_cookie(request: Request, db: Session = Depends(get_db)) -> User:
-    """Extract and verify user from JWT token in cookies."""
-    # Get token from cookie
-    token = request.cookies.get("timetide_token")
+async def get_current_user_from_cookie(
+    authorization: Optional[str] = Header(None),
+    timetide_token: str = Cookie(None),
+    db: Session = Depends(get_db)
+) -> User:
+    """Extract and verify user from JWT token in cookies or Authorization header."""
+    token = None
+    
+    # Try Authorization header first (Bearer token)
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]  # Remove "Bearer " prefix
+    # Fall back to cookie
+    elif timetide_token:
+        token = timetide_token
     
     if not token:
         raise HTTPException(
@@ -360,9 +370,22 @@ async def create_entry(
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     
-    # Check if user is owner or family member
-    if trip.owner_id != current_user.id:
-        # TODO: Also check if user is in trip's family
+    # Check if user is owner or has accepted invite
+    is_owner = trip.owner_id == current_user.id
+    has_edit_access = is_owner
+    
+    if not has_edit_access:
+        # Check for accepted invite with editor permission
+        from app.models.database import TripInvite
+        invite = db.query(TripInvite).filter(
+            TripInvite.trip_id == entry_data.trip_id,
+            TripInvite.invitee_id == current_user.id,
+            TripInvite.status == "accepted",
+            TripInvite.permission_level == "editor"
+        ).first()
+        has_edit_access = invite is not None
+    
+    if not has_edit_access:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to add entries to this trip")
     
     # Create location if provided

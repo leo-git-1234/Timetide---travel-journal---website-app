@@ -338,12 +338,6 @@
             </span>
             <span class="stat-label">Entries</span>
         </div>
-        <div class="profile-stat">
-            <span class="stat-number" id="familyCount">
-                <span class="loading-skeleton" style="width: 40px; display: inline-block;"></span>
-            </span>
-            <span class="stat-label">Families</span>
-        </div>
     </div>
     
     <!-- Edit Profile Button -->
@@ -477,13 +471,11 @@ async function loadStats() {
         
         document.getElementById('tripCount').textContent = stats.trips;
         document.getElementById('entryCount').textContent = stats.entries;
-        document.getElementById('familyCount').textContent = stats.families;
     } catch (error) {
         console.error('Error loading stats:', error);
         // Set default values on error
         document.getElementById('tripCount').textContent = '0';
         document.getElementById('entryCount').textContent = '0';
-        document.getElementById('familyCount').textContent = '0';
     }
 }
 

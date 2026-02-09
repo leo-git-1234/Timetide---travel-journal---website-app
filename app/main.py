@@ -14,7 +14,7 @@ from app.models import init_db, get_db
 from app.models.database import User, Trip, Entry
 from app.routes import trips, entries, users
 from app.routes import auth_jwt as auth_routes
-from app.routes import my_trips, revisit
+from app.routes import my_trips, revisit, sharing
 from app.auth.session import get_current_user_from_request
 
 # Initialize FastAPI app
@@ -80,6 +80,7 @@ app.include_router(auth_routes.router, prefix="/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(trips.router, prefix="/trips", tags=["Trips"])
 app.include_router(entries.router, prefix="/entries", tags=["Entries"])
+app.include_router(sharing.router, tags=["Sharing"])
 app.include_router(my_trips.router, tags=["Pages"])
 app.include_router(revisit.router, tags=["Pages"])
 
@@ -219,8 +220,22 @@ async def create_entry_page(trip_id: int, request: Request, db: Session = Depend
     if not trip:
         return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
     
-    # Only owner can add entries (for now)
-    if trip.owner_id != current_user.id:
+    # Check if user is owner or has accepted invite with editor permission
+    is_owner = trip.owner_id == current_user.id
+    has_edit_access = is_owner
+    
+    if not has_edit_access:
+        # Check for accepted invite with editor permission
+        from app.models.database import TripInvite
+        invite = db.query(TripInvite).filter(
+            TripInvite.trip_id == trip_id,
+            TripInvite.invitee_id == current_user.id,
+            TripInvite.status == "accepted",
+            TripInvite.permission_level == "editor"
+        ).first()
+        has_edit_access = invite is not None
+    
+    if not has_edit_access:
         return templates.TemplateResponse("404.html", {"request": request}, status_code=403)
     
     return templates.TemplateResponse(
@@ -250,8 +265,21 @@ async def day_view(trip_id: int, date: str, request: Request, db: Session = Depe
     if not trip:
         return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
     
-    # Verify user owns this trip
-    if trip.owner_id != current_user.id:
+    # Check if user is owner or has accepted invite (viewer or editor)
+    is_owner = trip.owner_id == current_user.id
+    has_view_access = is_owner
+    
+    if not has_view_access:
+        # Check for accepted invite (any permission level allows viewing)
+        from app.models.database import TripInvite
+        invite = db.query(TripInvite).filter(
+            TripInvite.trip_id == trip_id,
+            TripInvite.invitee_id == current_user.id,
+            TripInvite.status == "accepted"
+        ).first()
+        has_view_access = invite is not None
+    
+    if not has_view_access:
         return templates.TemplateResponse("404.html", {"request": request}, status_code=403)
     
     # Parse date

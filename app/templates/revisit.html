@@ -506,6 +506,27 @@
         margin: 0.2rem 0 0 0;
     }
 
+    .trip-share-btn {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 6px;
+        padding: 0.35rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .trip-share-btn:hover {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: white;
+    }
+
     /* Empty State */
     .empty-state {
         text-align: center;
@@ -542,6 +563,85 @@
     .empty-btn:hover {
         background: #5a7a68;
         transform: translateY(-2px);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-content {
+        background-color: var(--surface);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        font-family: var(--font-serif);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+    }
+
+    .btn-small {
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-small-secondary {
+        background: var(--border);
+        color: var(--text-secondary);
+    }
+
+    .btn-small-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
     }
 
     /* Responsive */
@@ -791,7 +891,7 @@
                                     </div>
                                     <div class="year-trips">
                                         {% for trip in year_group.trips %}
-                                            <div class="year-trip" onclick="event.stopPropagation(); window.location.href='/trip/{{ trip.id }}'">
+                                            <div class="year-trip" onclick="event.stopPropagation(); if(event.target.closest('.trip-share-btn')) return; window.location.href='/trip/{{ trip.id }}'">
                                                 {% if trip.cover_image %}
                                                     <img src="{{ trip.cover_image }}" alt="{{ trip.title }}" class="year-trip-photo">
                                                 {% else %}
@@ -802,6 +902,7 @@
                                                     <p class="trip-date">{{ trip.start_date }}</p>
                                                     <p class="trip-entries">{{ trip.num_entries }} entries</p>
                                                 </div>
+                                                <button class="trip-share-btn" onclick="event.stopPropagation(); openTripSharingModal({{ trip.id }}, '{{ trip.title }}')">Share</button>
                                             </div>
                                         {% endfor %}
                                     </div>
@@ -878,5 +979,94 @@
         })
         .catch(error => console.error('Error:', error));
     }
+
+    // Trip Sharing Modal Functions
+    let currentTripId = null;
+
+    function openTripSharingModal(tripId, tripTitle) {
+        currentTripId = tripId;
+        const modal = document.getElementById('tripSharingModal');
+        if (modal) {
+            modal.classList.add('show');
+            // Update modal title with trip name
+            modal.querySelector('.modal-header').textContent = `Share "${tripTitle}"`;
+            document.getElementById('shareEmail').value = '';
+            document.getElementById('permissionLevel').value = 'editor';
+        }
+    }
+
+    function closeTripSharingModal() {
+        const modal = document.getElementById('tripSharingModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+        currentTripId = null;
+    }
+
+    async function sendTripShare() {
+        if (!currentTripId) return;
+        
+        const email = document.getElementById('shareEmail').value.trim();
+        const permissionLevel = document.getElementById('permissionLevel').value;
+        
+        if (!email) {
+            alert('Please enter an email address');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/sharing/trips/${currentTripId}/share`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email,
+                    permission_level: permissionLevel
+                })
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                alert(`Invite sent to ${email}!`);
+                closeTripSharingModal();
+            } else {
+                alert(data.detail || 'Failed to send invite');
+            }
+        } catch (error) {
+            console.error('Error sending invite:', error);
+            alert('Error sending invite');
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('tripSharingModal');
+        if (event.target === modal) {
+            closeTripSharingModal();
+        }
+    }
 </script>
+
+<!-- Trip Sharing Modal -->
+<div id="tripSharingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Share Trip</div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">Email Address</label>
+            <input type="email" id="shareEmail" placeholder="invite@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; box-sizing: border-box;">
+            
+            <label style="display: block; margin: 1rem 0 0.5rem 0; font-weight: 600; color: var(--text-primary);">Permission Level</label>
+            <select id="permissionLevel" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; box-sizing: border-box;">
+                <option value="viewer">Viewer (Can view entries)</option>
+                <option value="editor">Editor (Can create entries)</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeTripSharingModal()" class="btn-small btn-small-secondary">Cancel</button>
+            <button onclick="sendTripShare()" style="background: var(--accent); color: white;" class="btn-small">Send Invite</button>
+        </div>
+    </div>
+</div>
 {% endblock %}

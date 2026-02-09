@@ -495,6 +495,17 @@
         </div>
     </div>
 
+    <!-- Trip Sharing Section -->
+    <div class="settings-section">
+        <h2 class="settings-section-title">Manage Trip Sharing</h2>
+        
+        <div id="tripSharingList" style="max-height: 400px; overflow-y: auto;">
+            <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                Loading trips...
+            </div>
+        </div>
+    </div>
+
     <!-- Danger Zone Section -->
     <div class="settings-section">
         <h2 class="settings-section-title">Danger Zone</h2>
@@ -507,6 +518,30 @@
             <div class="settings-action">
                 <button class="btn-small btn-small-danger" onclick="openDeleteAccountModal()">Delete Account</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trip Sharing Modal -->
+<div id="tripSharingModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">Share Trip</div>
+        <div class="modal-body">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email Address</label>
+                <input type="email" id="shareEmail" placeholder="user@example.com" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Permission Level</label>
+                <select id="permissionLevel" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;">
+                    <option value="viewer">Viewer (read-only)</option>
+                    <option value="editor" selected>Editor (can edit entries)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-small btn-small-secondary" onclick="closeTripSharingModal()">Cancel</button>
+            <button class="btn-small" id="shareBtn" onclick="sendTripShare()">Send Invite</button>
         </div>
     </div>
 </div>
@@ -927,6 +962,89 @@ async function changeLanguage(languageCode) {
     }
 }
 
+// Trip Sharing Functions
+let currentTripId = null;
+
+async function loadTripSharing() {
+    try {
+        const response = await fetch('/trips/', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) throw new Error('Failed to load trips');
+        
+        const trips = await response.json();
+        const container = document.getElementById('tripSharingList');
+        
+        if (trips.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">No trips found. Create one first!</div>';
+            return;
+        }
+        
+        container.innerHTML = trips.map(trip => `
+            <div style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+                <img src="${trip.cover_image || '/static/images/placeholder-trip.jpg'}" alt="${trip.title}" style="width: 80px; height: 60px; object-fit: cover; border-radius: 6px; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; color: var(--text-primary);">${trip.title}</div>
+                    <div style="font-size: 0.9rem; color: var(--text-secondary);">${trip.location}</div>
+                </div>
+                <button class="btn-small" onclick="openTripSharingModal(${trip.id}, '${trip.title}')" style="flex-shrink: 0;">Share</button>
+            </div>
+        `).join('');
+    } catch (error) {
+        console.error('Error loading trip sharing:', error);
+        document.getElementById('tripSharingList').innerHTML = '<div style="padding: 1rem; color: #c94848;">Error loading trips</div>';
+    }
+}
+
+function openTripSharingModal(tripId, tripTitle) {
+    currentTripId = tripId;
+    document.getElementById('tripSharingModal').classList.add('show');
+    // Update modal title with trip name
+    document.querySelector('#tripSharingModal .modal-header').textContent = `Share "${tripTitle}"`;
+    document.getElementById('shareEmail').value = '';
+    document.getElementById('permissionLevel').value = 'editor';
+}
+
+function closeTripSharingModal() {
+    document.getElementById('tripSharingModal').classList.remove('show');
+    currentTripId = null;
+}
+
+async function sendTripShare() {
+    if (!currentTripId) return;
+    
+    const email = document.getElementById('shareEmail').value.trim();
+    const permissionLevel = document.getElementById('permissionLevel').value;
+    
+    if (!email) {
+        alert('Please enter an email address');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/sharing/trips/${currentTripId}/share`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, permission_level: permissionLevel })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to share trip');
+        }
+        
+        alert('Invite sent successfully to ' + email);
+        closeTripSharingModal();
+        loadTripSharing();
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
 // Close modals when clicking outside
 window.onclick = function(event) {
     const modals = [
@@ -948,6 +1066,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (token) {
         loadUserData();
+        loadTripSharing();
     } else {
         console.warn('No authentication token found. User may not be logged in.');
     }

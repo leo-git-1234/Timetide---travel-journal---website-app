@@ -224,20 +224,35 @@ async def get_current_user_from_cookie(request: Request, db: Session = Depends(g
 
 @router.get("/", response_model=List[TripOut])
 async def get_trips(db: Session = Depends(get_db), current_user: User = Depends(get_current_user_from_cookie)):
-    """Get all trips for the current user with statistics."""
-    trips = db.query(Trip).options(
+    """Get all trips for the current user with statistics (owned + shared)."""
+    from app.models.database import TripInvite
+    
+    # Get owned trips
+    owned_trips = db.query(Trip).options(
         joinedload(Trip.entries).joinedload(Entry.photos),
         joinedload(Trip.entries).joinedload(Entry.location)
     ).filter(Trip.owner_id == current_user.id).order_by(Trip.created_at.desc()).all()
+    
+    # Get shared trips (accepted invites)
+    shared_invites = db.query(TripInvite).filter(
+        TripInvite.invitee_id == current_user.id,
+        TripInvite.status == "accepted"
+    ).all()
+    
+    shared_trips = [invite.trip for invite in shared_invites]
+    
+    # Combine and sort
+    all_trips = owned_trips + shared_trips
+    all_trips = sorted(all_trips, key=lambda t: t.created_at, reverse=True)
 
-    trip_ids = [trip.id for trip in trips]
+    trip_ids = [trip.id for trip in all_trips]
     status_rows = db.query(TripStatus).filter(TripStatus.trip_id.in_(trip_ids)).all() if trip_ids else []
     status_map = {row.trip_id: row.status for row in status_rows}
     favorite_set = get_favorite_set(db, current_user.id, trip_ids)
     
     # Add statistics to each trip
     result = []
-    for trip in trips:
+    for trip in all_trips:
         result.append({
             "id": trip.id,
             "title": trip.title,
@@ -324,8 +339,21 @@ async def get_trip(trip_id: int, db: Session = Depends(get_db), current_user: Us
     if not trip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     
-    # Enforce ownership (or allow family members - to be implemented)
-    if trip.owner_id != current_user.id:
+    # Check access: owner or accepted invite
+    is_owner = trip.owner_id == current_user.id
+    has_access = is_owner
+    
+    if not has_access:
+        # Check for accepted invite
+        from app.models.database import TripInvite
+        invite = db.query(TripInvite).filter(
+            TripInvite.trip_id == trip_id,
+            TripInvite.invitee_id == current_user.id,
+            TripInvite.status == "accepted"
+        ).first()
+        has_access = invite is not None
+    
+    if not has_access:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to access this trip")
     
     # Sort entries by date and time

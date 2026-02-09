@@ -62,6 +62,8 @@ class User(Base):
     entries = relationship('Entry', back_populates='author', cascade='all, delete-orphan')
     families = relationship('Family', secondary=family_members, back_populates='members')
     likes = relationship('Like', back_populates='user', cascade='all, delete-orphan')
+    sent_invites = relationship('TripInvite', foreign_keys='TripInvite.inviter_id', back_populates='inviter', cascade='all, delete-orphan')
+    received_invites = relationship('TripInvite', foreign_keys='TripInvite.invitee_id', back_populates='invitee', cascade='all, delete-orphan')
     
     # Following relationships
     following = relationship(
@@ -118,6 +120,7 @@ class Trip(Base):
     entries = relationship('Entry', back_populates='trip', cascade='all, delete-orphan')
     families = relationship('Family', secondary=family_trips, back_populates='trips')
     media = relationship('TripMedia', back_populates='trip', cascade='all, delete-orphan')
+    invites = relationship('TripInvite', back_populates='trip', cascade='all, delete-orphan')
     
     @property
     def num_days(self):
@@ -285,3 +288,30 @@ class Like(Base):
     
     def __repr__(self):
         return f"<Like by {self.user.username} on Entry {self.entry_id}>"
+
+
+class TripInvite(Base):
+    """TripInvite model for sharing trips with other users."""
+    __tablename__ = 'trip_invites'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    trip_id = Column(Integer, ForeignKey('trips.id'), nullable=False)
+    inviter_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    invitee_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    status = Column(String(20), default='pending')  # 'pending', 'accepted', 'declined'
+    permission_level = Column(String(20), default='editor')  # 'viewer', 'editor', 'admin'
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Ensure unique pending invites per trip and invitee
+    __table_args__ = (
+        UniqueConstraint('trip_id', 'invitee_id', name='unique_pending_invite'),
+    )
+    
+    # Relationships
+    trip = relationship('Trip', back_populates='invites')
+    inviter = relationship('User', foreign_keys=[inviter_id], back_populates='sent_invites')
+    invitee = relationship('User', foreign_keys=[invitee_id], back_populates='received_invites')
+    
+    def __repr__(self):
+        return f"<TripInvite {self.id}: Trip {self.trip_id} to {self.invitee_id} ({self.status}>"
