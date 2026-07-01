@@ -118,7 +118,7 @@
         document.cookie = `timetide_token=${token}; path=/; SameSite=Strict`;
         localStorage.setItem('token', token);
         console.log('Token stored in cookie and localStorage after signup');
-        window.location.assign('/my-trips');
+        window.location.assign('/dashboard');
       } catch (err) {
         console.error('Signup error:', err);
         showError('Network error. Please try again.');

@@ -30,6 +30,10 @@ def get_current_user_from_request(request: Request, db: Session) -> User | None:
             if payload:
                 user_id = payload.get("sub")
                 if user_id:
+                    try:
+                        user_id = int(user_id)
+                    except (TypeError, ValueError):
+                        return None
                     current_user = db.query(User).filter(User.id == user_id).first()
                     if current_user:
                         return current_user
