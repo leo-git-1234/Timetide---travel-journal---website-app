@@ -3,6 +3,7 @@ Timetide - Travel Diary Application
 Main FastAPI application entry point
 """
 
+import logging
 from fastapi import FastAPI, Request, Depends, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -10,12 +11,14 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import Session
 
-from app.models import init_db, get_db
+from app.models import init_db, get_db, get_database_diagnostics
 from app.models.database import User, Trip, Entry
 from app.routes import trips, entries, users
 from app.routes import auth_jwt as auth_routes
 from app.routes import my_trips, revisit, sharing
 from app.auth.session import get_current_user_from_request
+
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -74,6 +77,13 @@ templates.env.globals['timedelta'] = timedelta
 async def startup_event():
     """Initialize database on startup."""
     init_db()
+    db_info = get_database_diagnostics()
+    if db_info["dialect"] == "SQLite":
+        logger.warning("Database: SQLite")
+    else:
+        host = db_info["host"] or "unknown-host"
+        logger.info("Database: %s", db_info["dialect"])
+        logger.info("URL host: %s", host)
 
 # Include routers
 app.include_router(auth_routes.router, prefix="/auth", tags=["Authentication"])
