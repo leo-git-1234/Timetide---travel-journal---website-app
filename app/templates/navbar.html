@@ -55,58 +55,59 @@
             {% endif %}
         </div>
         
-        <!-- MOBILE NAV: Bottom tab bar only -->
-        {% if current_user %}
-        <div class="navbar-mobile">
-            <!-- Bottom Navigation Bar (Mobile Only) -->
-            <div class="mobile-bottom-nav">
-                <a href="/dashboard" class="mobile-nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-label="Home">
-                    <svg class="mobile-nav-icon home-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 11.5L12 4l9 7.5"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10.5V20h5v-5h4v5h5v-9.5"/>
-                    </svg>
-                    <span>Home</span>
-                </a>
-                <a href="/my-trips" class="mobile-nav-item {% if active_page == 'my-trips' %}active{% endif %}" data-label="Trips">
-                    <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
-                    </svg>
-                    <span>Trips</span>
-                </a>
-                <a href="/explore" class="mobile-nav-item {% if active_page == 'explore' %}active{% endif %}" data-label="Explore">
-                    <svg class="mobile-nav-icon explore-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c2.8 2.6 4.5 5.9 4.5 9s-1.7 6.4-4.5 9c-2.8-2.6-4.5-5.9-4.5-9S9.2 5.6 12 3z"/>
-                    </svg>
-                    <span>Explore</span>
-                </a>
-                <a href="/revisit" class="mobile-nav-item {% if active_page == 'revisit' %}active{% endif %}" data-label="Revisit">
-                    <svg class="mobile-nav-icon revisit-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 8h8M8 12h8M8 16h5"/>
-                    </svg>
-                    <span>Revisit</span>
-                </a>
-                <a href="/calendar" class="mobile-nav-item {% if active_page == 'calendar' %}active{% endif %}" data-label="Calendar">
-                    <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3v3M17 3v3M4 8h16"/>
-                        <rect x="4" y="5" width="16" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h3M8 16h3M13 12h3M13 16h3"/>
-                    </svg>
-                    <span>Calendar</span>
-                </a>
-                <a href="/trip/new" class="mobile-nav-item mobile-fab" data-label="New">
-                    <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-        {% endif %}
+        <!-- MOBILE NAV placeholder (rendered separately to avoid stacking/position issues) -->
     </div>
 </nav>
+
+{% if current_user %}
+<div class="navbar-mobile" aria-hidden="false">
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+    <div class="mobile-bottom-nav">
+        <a href="/dashboard" class="mobile-nav-item {% if active_page == 'dashboard' %}active{% endif %}" data-label="Home">
+            <svg class="mobile-nav-icon home-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 11.5L12 4l9 7.5"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10.5V20h5v-5h4v5h5v-9.5"/>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="/my-trips" class="mobile-nav-item {% if active_page == 'my-trips' %}active{% endif %}" data-label="Trips">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5a2 2 0 002 2h2a2 2 0 002-2"/>
+            </svg>
+            <span>Trips</span>
+        </a>
+        <a href="/explore" class="mobile-nav-item {% if active_page == 'explore' %}active{% endif %}" data-label="Explore">
+            <svg class="mobile-nav-icon explore-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h18"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3c2.8 2.6 4.5 5.9 4.5 9s-1.7 6.4-4.5 9c-2.8-2.6-4.5-5.9-4.5-9S9.2 5.6 12 3z"/>
+            </svg>
+            <span>Explore</span>
+        </a>
+        <a href="/revisit" class="mobile-nav-item {% if active_page == 'revisit' %}active{% endif %}" data-label="Revisit">
+            <svg class="mobile-nav-icon revisit-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 8h8M8 12h8M8 16h5"/>
+            </svg>
+            <span>Revisit</span>
+        </a>
+        <a href="/calendar" class="mobile-nav-item {% if active_page == 'calendar' %}active{% endif %}" data-label="Calendar">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3v3M17 3v3M4 8h16"/>
+                <rect x="4" y="5" width="16" height="16" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h3M8 16h3M13 12h3M13 16h3"/>
+            </svg>
+            <span>Calendar</span>
+        </a>
+        <a href="/trip/new" class="mobile-nav-item mobile-fab" data-label="New">
+            <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+        </a>
+    </div>
+</div>
+{% endif %}
 
 <!-- Invites Modal -->
 <div id="invitesModal" class="invites-modal">

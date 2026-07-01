@@ -341,36 +341,22 @@ a:hover {
     display: block;
 }
 
-html[data-device='mobile'] .navbar-desktop {
-    display: block;
-}
-
-html[data-device='mobile'] .navbar-mobile {
-    display: flex;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: auto;
-    z-index: 1500;
-    width: 100vw;
-    flex-direction: column;
-}
-
-html[data-device='desktop'] .navbar-mobile {
-    display: none;
-}
-
-html[data-device='desktop'] .navbar-desktop {
-    display: block;
-}
-
 /* Mobile Bottom Navigation Bar */
-.mobile-bottom-nav {
+.navbar-mobile {
     position: fixed;
-    bottom: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    z-index: 1500;
+    background: transparent;
+    pointer-events: none;
+}
+
+.mobile-bottom-nav {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
     z-index: 500;
     background: rgba(253, 251, 247, 0.72);
     backdrop-filter: blur(18px) saturate(160%);
@@ -381,6 +367,7 @@ html[data-device='desktop'] .navbar-desktop {
     align-items: center;
     height: 70px;
     box-shadow: 0 -6px 20px rgba(0,0,0,0.04);
+    pointer-events: auto;
 }
 
 .mobile-nav-item {
@@ -1453,26 +1440,7 @@ html[data-device='desktop'] .navbar-desktop {
 
 @media (max-width: 768px) {
     /* Mobile Navigation Display */
-    html[data-device='mobile'] .navbar-desktop {
-        display: block !important;
-    }
-    
-    html[data-device='mobile'] .navbar-mobile {
-        display: flex !important;
-        position: fixed !important;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: auto !important;
-        width: 100vw;
-        flex-direction: column;
-    }
-    
-    html[data-device='desktop'] .navbar-mobile {
-        display: none !important;
-    }
-    
-    html[data-device='desktop'] .navbar-desktop {
+    .navbar-mobile {
         display: block !important;
     }
     
@@ -1481,21 +1449,12 @@ html[data-device='desktop'] .navbar-desktop {
         padding-bottom: 80px;
     }
 
-    html[data-device='mobile'] .navbar-center {
+    .navbar-center {
         display: none !important;
     }
 
-    html[data-device='mobile'] .mobile-bottom-nav {
+    .mobile-bottom-nav {
         background: rgba(253, 251, 247, 0.76);
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
-    
-    /* Mobile-specific profile dropdown positioning */
-    .profile-dropdown {
-        position: static;
     }
     
     .dropdown-content {
