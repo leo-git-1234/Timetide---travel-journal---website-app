@@ -3,6 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            function isLikelyMobileDevice() {
+                var ua = navigator.userAgent || '';
+                var uaMobile = (navigator.userAgentData && navigator.userAgentData.mobile) || /Android|iPhone|iPad|iPod|Mobi/i.test(ua);
+                var coarsePointer = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+                var narrowScreen = Math.min(window.screen.width || 0, window.screen.height || 0) <= 820;
+                return !!(uaMobile || (coarsePointer && narrowScreen));
+            }
+
+            function applyDeviceMode() {
+                var isMobile = isLikelyMobileDevice();
+                document.documentElement.dataset.device = isMobile ? 'mobile' : 'desktop';
+                document.documentElement.classList.toggle('is-mobile-device', isMobile);
+                document.documentElement.classList.toggle('is-desktop-device', !isMobile);
+            }
+
+            applyDeviceMode();
+        })();
+    </script>
     <title>{% block title %}Timetide{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
     {% block extra_css %}{% endblock %}

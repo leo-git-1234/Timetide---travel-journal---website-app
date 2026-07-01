@@ -341,28 +341,28 @@ a:hover {
     display: block;
 }
 
-/* Mobile Top Bar */
-.mobile-top-bar {
+html[data-device='mobile'] .navbar-desktop {
+    display: block;
+}
+
+html[data-device='mobile'] .navbar-mobile {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    gap: 1rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 1500;
+    width: 100vw;
+    flex-direction: column;
 }
 
-.mobile-logo {
-    height: 32px;
-    display: flex;
-    align-items: center;
+html[data-device='desktop'] .navbar-mobile {
+    display: none;
 }
 
-.mobile-logo img {
-    height: 32px;
-    width: auto;
-}
-
-.mobile-profile {
-    cursor: pointer;
+html[data-device='desktop'] .navbar-desktop {
+    display: block;
 }
 
 /* Mobile Bottom Navigation Bar */
@@ -372,13 +372,15 @@ a:hover {
     left: 0;
     right: 0;
     z-index: 500;
-    background: white;
-    border-top: 1px solid var(--border);
+    background: rgba(253, 251, 247, 0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-top: 1px solid rgba(224, 216, 207, 0.55);
     display: flex;
     justify-content: space-around;
     align-items: center;
     height: 70px;
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.04);
 }
 
 .mobile-nav-item {
@@ -413,6 +415,17 @@ a:hover {
     width: 24px;
     height: 24px;
     stroke-width: 2;
+}
+
+.mobile-nav-icon.home-icon,
+.mobile-nav-icon.explore-icon,
+.mobile-nav-icon.revisit-icon {
+    fill: none;
+    stroke: currentColor;
+}
+
+.mobile-nav-item span {
+    line-height: 1;
 }
 
 /* FAB Button (New Trip) */
@@ -1440,25 +1453,27 @@ a:hover {
 
 @media (max-width: 768px) {
     /* Mobile Navigation Display */
-    .navbar-desktop {
-        display: none;
+    html[data-device='mobile'] .navbar-desktop {
+        display: block !important;
     }
     
-    .navbar-mobile {
-        display: flex;
+    html[data-device='mobile'] .navbar-mobile {
+        display: flex !important;
+        position: fixed !important;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto !important;
+        width: 100vw;
         flex-direction: column;
     }
     
-    .navbar {
-        bottom: auto;
-        top: 0;
-        padding: 0;
+    html[data-device='desktop'] .navbar-mobile {
+        display: none !important;
     }
     
-    .navbar-container {
-        flex-direction: column;
-        gap: 0;
-        padding: 0;
+    html[data-device='desktop'] .navbar-desktop {
+        display: block !important;
     }
     
     /* Add padding to main content for bottom nav */
@@ -1466,32 +1481,16 @@ a:hover {
         padding-bottom: 80px;
     }
 
-    .navbar-top {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.75rem;
-        min-height: auto;
+    html[data-device='mobile'] .navbar-center {
+        display: none !important;
     }
 
-    .navbar-brand {
-        position: static;
-        transform: none;
-    }
-
-    .navbar-right {
-        position: static;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .navbar-logo-image {
-        height: 36px;
-    }
-    
-    .navbar-center {
-        gap: 1rem;
-        flex-wrap: wrap;
-        justify-content: center;
+    html[data-device='mobile'] .mobile-bottom-nav {
+        background: rgba(253, 251, 247, 0.76);
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
     }
     
     /* Mobile-specific profile dropdown positioning */
@@ -1502,12 +1501,12 @@ a:hover {
     .dropdown-content {
         position: fixed;
         top: auto;
-        bottom: 80px;
-        left: auto;
-        right: 0;
-        width: 100%;
-        max-width: 280px;
-        border-radius: 12px 12px 0 0;
+        bottom: 84px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-width: none;
+        border-radius: 14px;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
     }
     
@@ -1535,6 +1534,15 @@ a:hover {
     
     .profile-stats {
         gap: 1.5rem;
+    }
+
+    .mobile-bottom-nav {
+        height: 72px;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    main {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0));
     }
 
     .empty-state {
