@@ -51,7 +51,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     hashed_password = Column(String(255), nullable=False)
     bio = Column(Text, nullable=True)
-    avatar_url = Column(String(500), nullable=True)
+    avatar_url = Column(Text, nullable=True)
     is_profile_public = Column(Boolean, default=False)
     language = Column(String(10), default='en', nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -235,7 +235,7 @@ class Photo(Base):
     __tablename__ = 'photos'
     
     id = Column(Integer, primary_key=True, index=True)
-    url = Column(String(500), nullable=False)
+    url = Column(Text, nullable=False)
     caption = Column(Text, nullable=True)
     order = Column(Integer, default=0)  # For ordering multiple photos in an entry
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -255,7 +255,7 @@ class TripMedia(Base):
     __tablename__ = 'trip_media'
     
     id = Column(Integer, primary_key=True, index=True)
-    url = Column(String(500), nullable=False)  # Base64 or file path
+    url = Column(Text, nullable=False)  # Base64 or file path
     media_type = Column(String(20), nullable=False)  # 'image' or 'video'
     file_name = Column(String(255), nullable=True)
     order = Column(Integer, default=0)  # For ordering multiple media in a trip

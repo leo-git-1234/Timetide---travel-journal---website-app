@@ -49,6 +49,20 @@ def init_db():
     """Initialize database tables."""
     Base.metadata.create_all(bind=engine)
 
+    # PostgreSQL may already have older VARCHAR-limited URL columns from a previous
+    # deployment. Expand them safely to TEXT so base64/data URLs do not fail.
+    if not DATABASE_URL.startswith("sqlite"):
+        with engine.begin() as connection:
+            connection.exec_driver_sql(
+                "ALTER TABLE IF EXISTS users ALTER COLUMN avatar_url TYPE TEXT"
+            )
+            connection.exec_driver_sql(
+                "ALTER TABLE IF EXISTS photos ALTER COLUMN url TYPE TEXT"
+            )
+            connection.exec_driver_sql(
+                "ALTER TABLE IF EXISTS trip_media ALTER COLUMN url TYPE TEXT"
+            )
+
 
 def get_database_diagnostics() -> dict:
     """Return safe, human-readable database diagnostics for startup logs."""
