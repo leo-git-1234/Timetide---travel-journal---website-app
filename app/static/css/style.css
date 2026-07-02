@@ -1459,14 +1459,15 @@ a:hover {
     
     .dropdown-content {
         position: fixed;
-        top: auto;
-        bottom: 84px;
-        left: 12px;
+        top: 70px;
+        bottom: auto;
+        left: auto;
         right: 12px;
         width: auto;
-        max-width: none;
+        max-width: calc(100vw - 24px);
+        max-width: 320px;
         border-radius: 14px;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
     }
     
     .trips-grid {
@@ -1475,7 +1476,7 @@ a:hover {
     
     .container,
     .container-narrow {
-        padding: var(--spacing-md) 1rem;
+        padding: var(--spacing-md) 0.75rem;
     }
     
     .trip-title {
@@ -1529,7 +1530,12 @@ a:hover {
     }
 
     .calendar-container {
-        padding: var(--spacing-lg);
+        padding: 0.75rem;
+        margin: 0 0.5rem;
+    }
+    
+    .calendar-grid {
+        gap: 0.5rem;
     }
 
     .day-preview {
@@ -1542,6 +1548,19 @@ a:hover {
 
     .shared-body {
         grid-template-columns: 1fr;
+    }
+    
+    /* Reduce min-width for grids on mobile */
+    .trips-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 0 0.5rem;
+    }
+    
+    .preview-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin: 0 0.5rem;
     }
 }
 

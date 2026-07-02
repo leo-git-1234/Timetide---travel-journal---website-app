@@ -24,22 +24,7 @@
         })();
     </script>
     <title>{% block title %}Timetide{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
-    <script>
-        // Append a timestamp to the style.css href to avoid stale-cache during development
-        (function(){
-            try {
-                var links = document.getElementsByTagName('link');
-                for (var i = 0; i < links.length; i++) {
-                    var l = links[i];
-                    if (l.rel === 'stylesheet' && /style\.css(\?|$)/.test(l.href)) {
-                        l.href = l.href.split('?')[0] + '?v=' + Date.now();
-                        break;
-                    }
-                }
-            } catch (e) { /* ignore */ }
-        })();
-    </script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}?v=1">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
